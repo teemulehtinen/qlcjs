@@ -2,20 +2,36 @@ import { Node as EstreeNode } from 'estree';
 
 export type Node = EstreeNode;
 
-export type QLC = {
+export type QLCGenerator = () => QLCBase;
+
+export interface QLCTemplate {
+  type: QLCType;
+  prepare: (ast: Node) => QLCGenerator[];
+}
+
+export interface QLCPrepared {
+  key: number;
+  type: QLCType;
+  generate: QLCGenerator;
+}
+
+export interface QLCBase {
   question: string;
   options: {
     answer: string;
     correct: boolean;
   }[];
-};
+}
 
-export type QLCTemplate = {
+export interface QLC extends QLCBase {
   type: QLCType;
-  prepare: (ast: Node) => {
-    available: boolean;
-    generate: (n?: number) => QLC[];
-  };
-};
+}
+
+export interface QLCRequest {
+  count: number;
+  fill?: boolean;
+  types?: QLCType[];
+  uniqueTypes?: boolean;
+}
 
 export type QLCType = 'FunctionName';

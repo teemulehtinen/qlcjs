@@ -1,6 +1,4 @@
-import { Node } from 'estree';
-
-export type NodeListener = (node: Node) => void;
+import { Node } from './types';
 
 const ifHaving = (...nodes: (Node | undefined | null)[]): Node[] =>
   nodes.filter((n): n is Node => n !== undefined && n !== null);
@@ -118,14 +116,25 @@ export const children = (node: Node): Node[] => {
 
 export const walk = (
   node: Node,
-  enter?: NodeListener,
-  leave?: NodeListener,
+  enter?: (node: Node) => boolean,
+  leave?: (node: Node) => void,
 ) => {
-  if (enter) {
-    enter(node);
+  if (enter === undefined || enter(node)) {
+    children(node).forEach(child => walk(child, enter, leave));
   }
-  children(node).forEach(child => walk(child, enter, leave));
   if (leave) {
     leave(node);
   }
+};
+
+export const select = (node: Node, types: string[]) => {
+  const out: Node[] = [];
+  walk(node, n => {
+    if (types.includes(n.type)) {
+      out.push(n);
+      return false;
+    }
+    return true;
+  });
+  return out;
 };

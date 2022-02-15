@@ -16,10 +16,12 @@ API.run();
 const functionName = suite('FunctionName');
 
 functionName('should detect function', () => {
-  const r = qlcjs.generate(HALVE_FUN);
-  console.log(r[0]);
-  console.log(r[0].qlcs[0].options);
-  assert.is(r.length, 1);
+  const qlcs = qlcjs.generate(HALVE_FUN, [
+    { count: 1, types: ['FunctionName'] },
+  ]);
+  assert.is(qlcs.length, 1);
+  console.log(qlcs[0]);
+  console.log(qlcs[0].options);
 });
 
 functionName.run();
