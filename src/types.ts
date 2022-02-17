@@ -17,10 +17,12 @@ export interface QLCPrepared {
 
 export interface QLCBase {
   question: string;
-  options: {
-    answer: string;
-    correct: boolean;
-  }[];
+  options: QLCOption[];
+}
+
+export interface QLCOption {
+  answer: string;
+  correct?: boolean;
 }
 
 export interface QLC extends QLCBase {

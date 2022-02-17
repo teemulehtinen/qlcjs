@@ -1,3 +1,4 @@
+import { asArray } from './arrays';
 import { Node } from './types';
 
 const ifHaving = (...nodes: (Node | undefined | null)[]): Node[] =>
@@ -127,14 +128,19 @@ export const walk = (
   }
 };
 
-export const select = (node: Node, types: string[]) => {
-  const out: Node[] = [];
-  walk(node, n => {
-    if (types.includes(n.type)) {
-      out.push(n);
-      return false;
-    }
-    return true;
-  });
+export const select = <T extends Node>(
+  node: Node | Node[],
+  types: string[],
+) => {
+  const out: T[] = [];
+  asArray(node).forEach(n =>
+    walk(n, child => {
+      if (types.includes(child.type)) {
+        out.push(child as T);
+        return false;
+      }
+      return true;
+    }),
+  );
   return out;
 };

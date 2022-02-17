@@ -1,23 +1,32 @@
+import { FunctionDeclaration, FunctionExpression, Identifier } from 'estree';
 import { Node } from './types';
 import { select, walk } from './walker';
 
 export type Naming = {
   fun?: string;
+  parameters: Set<string>;
   variables: Set<string>;
   keywords: Set<string>;
 };
 
 export type FunctionNaming = {
   fun: string;
+  parameters: Set<string>;
   variables: Set<string>;
   keywords: Set<string>;
 };
 
 export const extractNaming = (ast: Node): Naming[] =>
-  select(ast, ['FunctionDeclaration', 'FunctionExpression']).map(node => {
-    const keywords = new Set<string>(['function']);
+  select<FunctionDeclaration | FunctionExpression>(ast, [
+    'FunctionDeclaration',
+    'FunctionExpression',
+  ]).map(node => {
+    const parameters = new Set(
+      select<Identifier>(node.params, ['Identifier']).map(n => n.name),
+    );
     const variables = new Set<string>();
-    walk(ast, child => {
+    const keywords = new Set<string>();
+    walk(node.body, child => {
       switch (child.type) {
         case 'VariableDeclaration':
           keywords.add(child.kind);
@@ -38,13 +47,7 @@ export const extractNaming = (ast: Node): Naming[] =>
       }
       return true;
     });
-    if (
-      node.type === 'FunctionDeclaration' ||
-      node.type === 'FunctionExpression'
-    ) {
-      return { fun: node.id?.name, variables, keywords };
-    }
-    return { fun: undefined, variables, keywords };
+    return { fun: node.id?.name, parameters, variables, keywords };
   });
 
 export const extractFunctionNaming = (ast: Node): FunctionNaming[] =>
