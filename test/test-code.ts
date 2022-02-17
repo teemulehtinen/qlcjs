@@ -1,10 +1,18 @@
-export const HALVE_FUN = `
-  function halveNumber(n) {
-		let halved = n / 2;
-		return halved;
+export const TINY_FUN = `
+  function plusTwo(n) {
+		let newValue = n + 2;
+		return newValue;
 	}
+	
+	const summer = (a, b) => a + b;
+
+	const nested = function () {
+		const a = 1;
+		function b(i) {
+			return i + 10;
+		}
+		return b(a);
+	};
 `;
 
-export const HALVE_ARROW_FUN = `
-	const halveNumber = (n) => n / 2;
-`;
+export const MORE_FUN = ``;

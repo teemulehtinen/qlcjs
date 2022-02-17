@@ -1,19 +1,25 @@
-import { parse } from 'acorn';
-import { Node, QLC, QLCPrepared, QLCRequest, QLCType } from './types';
+import { parseScriptWithLocation } from 'shift-parser';
+import analyze from 'shift-scope';
+import { QLC, QLCPrepared, QLCRequest, QLCType } from './types';
 import questions from './questions';
 
 export { QLC, QLCType } from './types';
 
 export const prepare = (source: string, select?: QLCType[]): QLCPrepared[] => {
-  const ast = parse(source, { ecmaVersion: 2020, locations: true }) as Node;
+  const { tree, locations, comments } = parseScriptWithLocation(source);
+  const scope = analyze(tree);
   const templates = select
     ? questions.filter(({ type }) => select.includes(type))
     : questions;
   return templates
     .flatMap(({ type, prepare: prepareTemplate }) =>
-      prepareTemplate(ast).map(generate => ({ type, generate })),
+      prepareTemplate({ scope, tree, locations, comments }).map(generate => ({
+        type,
+        generate,
+      })),
     )
     .map(({ type, generate }, key) => ({ key, generate, type }));
+  return [];
 };
 
 const includedTypes = (requests: QLCRequest[]): QLCType[] | undefined => {

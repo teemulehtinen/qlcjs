@@ -1,12 +1,10 @@
-import { Node as EstreeNode } from 'estree';
-
-export type Node = EstreeNode;
-
-export type QLCGenerator = () => QLCBase;
+import { Script } from 'shift-ast';
+import { Comment, LocationMap } from 'shift-parser';
+import { Scope } from 'shift-scope';
 
 export interface QLCTemplate {
   type: QLCType;
-  prepare: (ast: Node) => QLCGenerator[];
+  prepare: (model: ProgramModel) => QLCGenerator[];
 }
 
 export interface QLCPrepared {
@@ -14,6 +12,15 @@ export interface QLCPrepared {
   type: QLCType;
   generate: QLCGenerator;
 }
+
+export interface ProgramModel {
+  scope: Scope;
+  tree: Script;
+  locations: LocationMap;
+  comments: Comment[];
+}
+
+export type QLCGenerator = () => QLCBase;
 
 export interface QLCBase {
   question: string;
