@@ -1,8 +1,13 @@
 import {
+  ForInStatement,
+  ForOfStatement,
+  ForStatement,
+  IfStatement,
   LiteralBooleanExpression,
   LiteralNumericExpression,
   LiteralStringExpression,
   Node,
+  WhileStatement,
 } from 'shift-ast';
 import children from './travelChildren';
 import { isNode } from './types';
@@ -36,12 +41,13 @@ export const find = <T extends Node>(parent: Node, types: string[]): T[] =>
     .filter(n => isNode<T>(n, types))
     .map(n => n as T);
 
+export type SimpleLiterals =
+  | LiteralBooleanExpression
+  | LiteralNumericExpression
+  | LiteralStringExpression;
+
 export const literalNodes = (parent: Node) =>
-  find<
-    | LiteralBooleanExpression
-    | LiteralNumericExpression
-    | LiteralStringExpression
-  >(parent, [
+  find<SimpleLiterals>(parent, [
     'LiteralBooleanExpression',
     'LiteralNumericExpression',
     'LiteralStringExpression',
@@ -49,3 +55,25 @@ export const literalNodes = (parent: Node) =>
 
 export const literalValues = (parent: Node) =>
   literalNodes(parent).map(n => n.value);
+
+export type SimpleLoops =
+  | ForStatement
+  | ForInStatement
+  | ForOfStatement
+  | WhileStatement;
+
+export const loopNodes = (parent: Node) =>
+  find<SimpleLoops>(parent, [
+    'ForStatement',
+    'ForInStatement',
+    'ForOfStatement',
+    'WhileStatement',
+  ]);
+
+export const lastBlockNode = (parent: Node) => {
+  if (parent.type === 'BlockStatement') {
+    const { statements } = parent.block;
+    return statements[statements.length - 1];
+  }
+  return parent;
+};

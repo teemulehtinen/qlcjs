@@ -31,9 +31,10 @@ functionName('should detect different functions', () => {
 });
 
 functionName('should generate distractors', () => {
-  const { correct, distractors } = splitCorrectAndDistractors(
-    mod.generate(BLA_CODE, [{ count: 1, types: ['FunctionName'] }])[0],
-  );
+  const qlc = mod.generate(BLA_CODE, [
+    { count: 1, types: ['FunctionName'] },
+  ])[0];
+  const { correct, distractors } = splitCorrectAndDistractors(qlc);
   assert.equal(correct, ['bla']);
   assert.ok(
     overlaps(distractors, ['function', 'n', 'repeated', 'const', 'return']),
@@ -54,9 +55,10 @@ parameterName('should detect different parameters', () => {
 });
 
 parameterName('should generate distractors', () => {
-  const { correct, distractors } = splitCorrectAndDistractors(
-    mod.generate(BLA_CODE, [{ count: 1, types: ['ParameterName'] }])[0],
-  );
+  const qlc = mod.generate(BLA_CODE, [
+    { count: 1, types: ['ParameterName'] },
+  ])[0];
+  const { correct, distractors } = splitCorrectAndDistractors(qlc);
   assert.equal(correct, ['n']);
   assert.ok(
     overlaps(distractors, ['bla', 'function', 'repeated', 'const', 'return']),
@@ -70,20 +72,28 @@ parameterName.run();
 const parameterValue = suite('ParameterValue');
 
 parameterValue('should generate answers to match description', () => {
-  const parameters = [[1], [2], [3], [4], [5]];
   const qlc = mod.generate(
     BLA_CODE,
     [{ count: 1, types: ['ParameterValue'] }],
-    [{ functionName: 'bla', parameters }],
+    [{ functionName: 'bla', parameters: [[1], [2], [3], [4], [5]] }],
   )[0];
-  const { correct } = splitCorrectAndDistractors(qlc);
-  assert.ok(qlc.question.includes(correct[0]));
-  assert.ok(
-    overlaps(
-      correct,
-      parameters.map(a => `${a[0]}`),
-    ),
-  );
+  const { correct, distractors } = splitCorrectAndDistractors(qlc);
+  assert.ok(qlc.question.includes(`${correct[0]}`));
+  assert.ok(overlaps(correct, [1, 2, 3, 4, 5]));
+  assert.ok(distractors.includes('"bla "'));
 });
 
 parameterValue.run();
+
+// ---
+
+const loopEnd = suite('LoopEnd');
+
+loopEnd('should detect loop lines', () => {
+  const qlc = mod.generate(BLA_CODE, [{ count: 1, types: ['LoopEnd'] }])[0];
+  const { correct, distractors } = splitCorrectAndDistractors(qlc);
+  assert.equal(correct, [10]);
+  assert.ok(distractors.length > 0);
+});
+
+loopEnd.run();

@@ -9,12 +9,12 @@ export type SimpleValue =
 const isSingle = (v: SimpleValue): v is boolean | number | string =>
   !Array.isArray(v);
 
-const toProgram = (v: boolean | number | string) =>
-  typeof v === 'string' ? `"${v}"` : `${v}`;
-
-export const simpleToProgram = (v: SimpleValue): string => {
-  if (isSingle(v)) {
-    return toProgram(v);
+const toProgram = (v: boolean | number | string): number | string => {
+  if (typeof v === 'number') {
+    return v;
   }
-  return `[${v.map(e => toProgram(e)).join(', ')}]`;
+  return typeof v === 'string' ? `"${v}"` : `${v}`;
 };
+
+export const simpleToProgram = (v: SimpleValue): string | number =>
+  isSingle(v) ? toProgram(v) : `[${v.map(e => toProgram(e)).join(', ')}]`;

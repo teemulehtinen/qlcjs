@@ -1,28 +1,36 @@
 import { Node } from 'shift-ast';
 import { LocationMap } from 'shift-parser';
 import { QLCOption, QLCTemplate } from './types';
-import { ArrayRequest, pickFrom, pickIndex, pickOne, shuffle } from './arrays';
+import { simpleToProgram } from './simpleValues';
+import {
+  ArrayRequest,
+  pickFrom,
+  pickIndex,
+  pickOne,
+  sortNumberOrString,
+} from './arrays';
 import { getParameterNames } from './getFunctions';
 import { getKeywords } from './getKeywords';
-import { literalValues } from './travelTrees';
-import { simpleToProgram } from './simpleValues';
+import { loopNodes, literalValues, lastBlockNode } from './travelTrees';
 import t from './i18n';
 
-const getLine = (node: Node, locations: LocationMap): number => {
+const getLine = (node: Node, locations: LocationMap, end?: boolean): number => {
   const r = locations.get(node);
+  if (end) {
+    return r ? r.end.line : 0;
+  }
   return r ? r.start.line : 0;
 };
 
 const buildOptions = (
-  correct: string[],
-  ...distractors: ArrayRequest<string>[]
+  correct: (string | number)[],
+  ...distractors: ArrayRequest<string | number>[]
 ): QLCOption[] => {
   const opt = pickFrom([correct], ...distractors);
-  return shuffle(
-    correct
-      .map(answer => ({ answer, correct: true } as QLCOption))
-      .concat(opt.slice(correct.length).map(answer => ({ answer }))),
-  );
+  return correct
+    .map(answer => ({ answer, correct: true } as QLCOption))
+    .concat(opt.slice(correct.length).map(answer => ({ answer })))
+    .sort((a, b) => sortNumberOrString(a.answer, b.answer));
 };
 
 const questions: QLCTemplate[] = [
@@ -83,22 +91,37 @@ const questions: QLCTemplate[] = [
           ({ params, finputs }) => params.length > 0 && finputs.length > 0,
         )
         .map(({ name, astNode, params, finputs }) => () => {
-          const i = pickIndex(params) || 0;
-          const p = (pickOne(finputs) || []).map(simpleToProgram);
+          const paramIndex = pickIndex(params) || 0;
+          const inputParams = (pickOne(finputs) || []).map(simpleToProgram);
           return {
             question: t(
               'q_parameter_value',
-              params[i],
-              `${name}(${p.join(', ')})`,
+              params[paramIndex],
+              `${name}(${inputParams.join(', ')})`,
             ),
             options: buildOptions(
-              [p[i]],
-              [p],
+              [inputParams[paramIndex]],
+              [inputParams],
               [() => literalValues(astNode).map(simpleToProgram), 3, true],
-              [() => finputs.map(d => simpleToProgram(d[i])), 5, true],
+              [() => finputs.map(d => simpleToProgram(d[paramIndex])), 5, true],
             ),
           };
         }),
+  },
+  {
+    type: 'LoopEnd',
+    prepare: ({ tree, locations }) =>
+      loopNodes(tree).map(loop => () => {
+        const beg = getLine(loop, locations);
+        const end = getLine(lastBlockNode(loop.body), locations, true);
+        const lines = [...Array(end - beg + 1).keys()]
+          .map(i => beg - 1 + i)
+          .concat(end + 2);
+        return {
+          question: t('q_loop_end', beg),
+          options: buildOptions([end], [lines, 8, true]),
+        };
+      }),
   },
 ];
 

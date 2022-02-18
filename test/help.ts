@@ -5,16 +5,12 @@ export const getCorrect = (qlcs: QLC[]) =>
 
 export const splitCorrectAndDistractors = (
   qlc: QLC,
-): { correct: string[]; distractors: string[] } => ({
-  correct: qlc.options
-    .filter(o => o.correct)
-    .map(o => o.answer)
-    .sort(),
-  distractors: qlc.options
-    .filter(o => !o.correct)
-    .map(o => o.answer)
-    .sort(),
+): { correct: (string | number)[]; distractors: (string | number)[] } => ({
+  correct: qlc.options.filter(o => o.correct).map(o => o.answer),
+  distractors: qlc.options.filter(o => !o.correct).map(o => o.answer),
 });
 
-export const overlaps = (test: string[], cover: string[]) =>
-  test.every(w => cover.includes(w));
+export const overlaps = (
+  test: (string | number)[],
+  cover: (string | number)[],
+) => test.every(w => cover.includes(w));

@@ -37,3 +37,22 @@ export const pickFrom = <T>(...requests: ArrayRequest<T>[]): T[] =>
     }
     return out.concat(pick(data, fill ? n - out.length : n));
   }, new Array<T>());
+
+export const sortNumberOrString = (
+  a: number | string,
+  b: number | string,
+): number => {
+  if (typeof a === 'number' && typeof b === 'string') {
+    return -1;
+  }
+  if (typeof a === 'string' && typeof b === 'number') {
+    return 1;
+  }
+  if (a < b) {
+    return -1;
+  }
+  if (a > b) {
+    return 1;
+  }
+  return 0;
+};

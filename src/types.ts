@@ -55,10 +55,14 @@ export interface QLCBase {
 }
 
 export interface QLCOption {
-  answer: string;
+  answer: string | number;
   correct?: boolean;
 }
 
 export interface QLC extends QLCTyped, QLCBase {}
 
-export type QLCType = 'FunctionName' | 'ParameterName' | 'ParameterValue';
+export type QLCType =
+  | 'FunctionName'
+  | 'ParameterName'
+  | 'ParameterValue'
+  | 'LoopEnd';
