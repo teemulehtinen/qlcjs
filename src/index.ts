@@ -1,12 +1,23 @@
 import { parseScriptWithLocation } from 'shift-parser';
 import analyze from 'shift-scope';
-import { ProgramModel, QLC, QLCPrepared, QLCType, QLCTyped } from './types';
+import {
+  ProgramModel,
+  QLC,
+  QLCPrepared,
+  QLCType,
+  QLCTyped,
+  SuggestedInput,
+} from './types';
 import questions from './questions';
 import { getFunctionsWithVariables } from './getFunctions';
+import { pickOne } from './arrays';
 
-export { QLC, QLCType } from './types';
+export { QLC, QLCType, SuggestedInput } from './types';
 
-export const createProgramModel = (source: string): ProgramModel => {
+export const createProgramModel = (
+  source: string,
+  inputs?: SuggestedInput[],
+): ProgramModel => {
   const { tree, locations, comments } = parseScriptWithLocation(source);
   const scope = analyze(tree);
   return {
@@ -15,6 +26,7 @@ export const createProgramModel = (source: string): ProgramModel => {
     comments,
     scope,
     functions: getFunctionsWithVariables(scope, tree),
+    inputs: inputs || [],
   };
 };
 
@@ -23,8 +35,12 @@ const selectByType = <T extends QLCTyped>(
   select: QLCType[] | undefined,
 ) => (select ? elements.filter(({ type }) => select.includes(type)) : elements);
 
-export const prepare = (source: string, select?: QLCType[]): QLCPrepared[] => {
-  const data = createProgramModel(source);
+export const prepare = (
+  source: string,
+  select?: QLCType[],
+  inputs?: SuggestedInput[],
+): QLCPrepared[] => {
+  const data = createProgramModel(source, inputs);
   return selectByType(questions, select)
     .flatMap(({ type, prepare: prepareTemplate }) =>
       prepareTemplate(data).map(generate => ({
@@ -42,13 +58,6 @@ const allUsedTypes = (requests: QLCRequest[]): QLCType[] | undefined => {
   return [...new Set(requests.flatMap(req => req.types || []))];
 };
 
-const pick = (selected: QLCPrepared[]) => {
-  if (selected.length === 0) {
-    return undefined;
-  }
-  return selected[Math.floor(Math.random() * selected.length)];
-};
-
 export interface QLCRequest {
   count: number;
   fill?: boolean;
@@ -56,13 +65,18 @@ export interface QLCRequest {
   uniqueTypes?: boolean;
 }
 
-export const generate = (source: string, requests: QLCRequest[]): QLC[] => {
-  let prepared = prepare(source, allUsedTypes(requests));
+export const generate = (
+  source: string,
+  requests?: QLCRequest[],
+  inputs?: SuggestedInput[],
+): QLC[] => {
+  const r = requests || [{ count: 1 }];
+  let prepared = prepare(source, allUsedTypes(r), inputs);
   const out: QLC[] = [];
-  requests.forEach(({ count, fill, types, uniqueTypes }) => {
+  r.forEach(({ count, fill, types, uniqueTypes }) => {
     let targetCount = fill ? count - out.length : count;
     while (targetCount > 0 && prepared.length > 0) {
-      const picked = pick(selectByType(prepared, types));
+      const picked = pickOne(selectByType(prepared, types));
       if (picked) {
         out.push({ type: picked.type, ...picked.generate() });
         if (uniqueTypes) {

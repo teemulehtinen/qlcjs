@@ -1,4 +1,9 @@
-import { Node } from 'shift-ast';
+import {
+  LiteralBooleanExpression,
+  LiteralNumericExpression,
+  LiteralStringExpression,
+  Node,
+} from 'shift-ast';
 import children from './travelChildren';
 import { isNode } from './types';
 
@@ -30,3 +35,17 @@ export const find = <T extends Node>(parent: Node, types: string[]): T[] =>
   flat(parent)
     .filter(n => isNode<T>(n, types))
     .map(n => n as T);
+
+export const literalNodes = (parent: Node) =>
+  find<
+    | LiteralBooleanExpression
+    | LiteralNumericExpression
+    | LiteralStringExpression
+  >(parent, [
+    'LiteralBooleanExpression',
+    'LiteralNumericExpression',
+    'LiteralStringExpression',
+  ]);
+
+export const literalValues = (parent: Node) =>
+  literalNodes(parent).map(n => n.value);

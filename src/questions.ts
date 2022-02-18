@@ -1,10 +1,12 @@
 import { Node } from 'shift-ast';
 import { LocationMap } from 'shift-parser';
-import { ArrayRequest, pickFrom, shuffle } from './arrays';
-import { getParameterNames } from './getFunctions';
 import { QLCOption, QLCTemplate } from './types';
-import t from './i18n';
+import { ArrayRequest, pickFrom, pickIndex, pickOne, shuffle } from './arrays';
+import { getParameterNames } from './getFunctions';
 import { getKeywords } from './getKeywords';
+import { literalValues } from './travelTrees';
+import { simpleToProgram } from './simpleValues';
+import t from './i18n';
 
 const getLine = (node: Node, locations: LocationMap): number => {
   const r = locations.get(node);
@@ -66,6 +68,37 @@ const questions: QLCTemplate[] = [
             [() => getKeywords(astNode), 5, true],
           ),
         })),
+  },
+  {
+    type: 'ParameterValue',
+    prepare: ({ functions, inputs }) =>
+      (functions || [])
+        .map(data => ({
+          ...data,
+          params: getParameterNames(data.astNode.params),
+          finputs:
+            inputs.find(i => i.functionName === data.name)?.parameters || [],
+        }))
+        .filter(
+          ({ params, finputs }) => params.length > 0 && finputs.length > 0,
+        )
+        .map(({ name, astNode, params, finputs }) => () => {
+          const i = pickIndex(params) || 0;
+          const p = (pickOne(finputs) || []).map(simpleToProgram);
+          return {
+            question: t(
+              'q_parameter_value',
+              params[i],
+              `${name}(${p.join(', ')})`,
+            ),
+            options: buildOptions(
+              [p[i]],
+              [p],
+              [() => literalValues(astNode).map(simpleToProgram), 3, true],
+              [() => finputs.map(d => simpleToProgram(d[i])), 5, true],
+            ),
+          };
+        }),
   },
 ];
 

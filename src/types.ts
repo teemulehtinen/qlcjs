@@ -1,7 +1,13 @@
-import { Node, Script } from 'shift-ast';
+import {
+  ArrowExpression,
+  FunctionDeclaration,
+  FunctionExpression,
+  Node,
+  Script,
+} from 'shift-ast';
 import { Comment, LocationMap } from 'shift-parser';
-import { Scope } from 'shift-scope';
-import { FunctionWithVariables } from './getFunctions';
+import { Scope, Variable } from 'shift-scope';
+import { SimpleValue } from './simpleValues';
 
 export const isNode = <T extends Node>(
   node: Node,
@@ -27,6 +33,18 @@ export interface ProgramModel {
   comments: Comment[];
   scope: Scope;
   functions: FunctionWithVariables[];
+  inputs: SuggestedInput[];
+}
+
+export interface FunctionWithVariables {
+  name: string;
+  astNode: FunctionDeclaration | ArrowExpression | FunctionExpression;
+  variables: Variable[];
+}
+
+export interface SuggestedInput {
+  functionName: string;
+  parameters: SimpleValue[][];
 }
 
 export type QLCGenerator = () => QLCBase;
@@ -43,4 +61,4 @@ export interface QLCOption {
 
 export interface QLC extends QLCTyped, QLCBase {}
 
-export type QLCType = 'FunctionName' | 'ParameterName';
+export type QLCType = 'FunctionName' | 'ParameterName' | 'ParameterValue';

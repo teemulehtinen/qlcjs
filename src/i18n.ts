@@ -1,23 +1,27 @@
-type Text = string | ((n: number) => string);
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-const texts: { [locale: string]: { [key: string]: Text } } = {
+type TextEntry = string | ((...args: any[]) => string);
+
+const texts: { [locale: string]: { [key: string]: TextEntry } } = {
   en: {
     q_function_name: 'Which is the name of the function?',
-    q_function_name_line: (n: number) =>
-      `Which is the name of the function that is declared on line ${n}?`,
+    q_function_name_line: (...args) =>
+      `Which is the name of the function that is declared on line ${args[0]}?`,
     q_parameter_name: 'Which are the parameter names of the function?',
-    q_parameter_name_line: (n: number) =>
-      `Which are the parameter names of the function that is declared on line ${n}?`,
+    q_parameter_name_line: (...args) =>
+      `Which are the parameter names of the function that is declared on line ${args[0]}?`,
+    q_parameter_value: (...args) =>
+      `Which value does ${args[0]} have when execution of ${args[1]} starts?`,
   },
 };
 
 // Implement if necessary at some point...
 const locale = 'en';
 
-const t = (key: string, n?: number): string => {
+const t = (key: string, ...args: any[]): string => {
   const txt = texts[locale][key];
   if (typeof txt === 'function') {
-    return txt(n || 0);
+    return txt(...args);
   }
   return txt;
 };

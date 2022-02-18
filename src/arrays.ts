@@ -8,7 +8,15 @@ export const shuffle = <T>(input: T[]): T[] =>
     .map(pair => pair[0]);
 
 export const pick = <T>(input: T[], n?: number): T[] =>
-  shuffle(input).slice(0, n || 1);
+  shuffle(input).slice(0, n);
+
+export const pickIndex = <T>(input: T[]): number | undefined =>
+  input.length === 0 ? undefined : Math.floor(Math.random() * input.length);
+
+export const pickOne = <T>(input: T[]): T | undefined => {
+  const i = pickIndex(input);
+  return i === undefined ? undefined : input[i];
+};
 
 export const notIn = <T>(input: T[], not: T[]): T[] =>
   input.filter(e => !not.includes(e));
@@ -20,11 +28,12 @@ export const pickFrom = <T>(...requests: ArrayRequest<T>[]): T[] =>
     if (n !== undefined && fill && out.length >= n) {
       return out;
     }
-    const data = typeof reserve === 'function' ? reserve() : reserve;
+    const data = notIn(
+      [...new Set(typeof reserve === 'function' ? reserve() : reserve)],
+      out,
+    );
     if (n === undefined) {
       return out.concat(data);
     }
-    return out.concat(
-      pick(notIn([...new Set(data)], out), fill ? n - out.length : n),
-    );
+    return out.concat(pick(data, fill ? n - out.length : n));
   }, new Array<T>());

@@ -2,12 +2,12 @@ import {
   ArrowExpression,
   BindingIdentifier,
   FormalParameters,
-  FunctionDeclaration,
   FunctionExpression,
   Node,
 } from 'shift-ast';
 import { Scope, Variable } from 'shift-scope';
 import { find, walk } from './travelTrees';
+import { FunctionWithVariables } from './types';
 
 export const isFunctionExpression = (
   node: Node,
@@ -28,12 +28,6 @@ export const searchFunctionVariables = (root: Node) => {
   });
   return nameMap;
 };
-
-export interface FunctionWithVariables {
-  name: string;
-  astNode: FunctionDeclaration | ArrowExpression | FunctionExpression;
-  variables: Variable[];
-}
 
 export const getFunctionsWithVariables = (
   global: Scope,

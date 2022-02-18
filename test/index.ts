@@ -64,3 +64,26 @@ parameterName('should generate distractors', () => {
 });
 
 parameterName.run();
+
+// ---
+
+const parameterValue = suite('ParameterValue');
+
+parameterValue('should generate answers to match description', () => {
+  const parameters = [[1], [2], [3], [4], [5]];
+  const qlc = mod.generate(
+    BLA_CODE,
+    [{ count: 1, types: ['ParameterValue'] }],
+    [{ functionName: 'bla', parameters }],
+  )[0];
+  const { correct } = splitCorrectAndDistractors(qlc);
+  assert.ok(qlc.question.includes(correct[0]));
+  assert.ok(
+    overlaps(
+      correct,
+      parameters.map(a => `${a[0]}`),
+    ),
+  );
+});
+
+parameterValue.run();
