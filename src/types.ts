@@ -1,23 +1,32 @@
-import { Script } from 'shift-ast';
+import { Node, Script } from 'shift-ast';
 import { Comment, LocationMap } from 'shift-parser';
 import { Scope } from 'shift-scope';
+import { FunctionWithVariables } from './getFunctions';
 
-export interface QLCTemplate {
+export const isNode = <T extends Node>(
+  node: Node,
+  types: string[],
+): node is T => types.includes(node.type);
+
+export interface QLCTyped {
   type: QLCType;
+}
+
+export interface QLCTemplate extends QLCTyped {
   prepare: (model: ProgramModel) => QLCGenerator[];
 }
 
-export interface QLCPrepared {
+export interface QLCPrepared extends QLCTyped {
   key: number;
-  type: QLCType;
   generate: QLCGenerator;
 }
 
 export interface ProgramModel {
-  scope: Scope;
   tree: Script;
   locations: LocationMap;
   comments: Comment[];
+  scope: Scope;
+  functions: FunctionWithVariables[];
 }
 
 export type QLCGenerator = () => QLCBase;
@@ -32,15 +41,6 @@ export interface QLCOption {
   correct?: boolean;
 }
 
-export interface QLC extends QLCBase {
-  type: QLCType;
-}
-
-export interface QLCRequest {
-  count: number;
-  fill?: boolean;
-  types?: QLCType[];
-  uniqueTypes?: boolean;
-}
+export interface QLC extends QLCTyped, QLCBase {}
 
 export type QLCType = 'FunctionName';

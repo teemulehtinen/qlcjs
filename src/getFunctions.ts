@@ -1,14 +1,15 @@
-import { ArrowExpression, FunctionExpression, Node } from 'shift-ast';
+import {
+  ArrowExpression,
+  BindingIdentifier,
+  FormalParameters,
+  FunctionDeclaration,
+  FunctionExpression,
+  Node,
+} from 'shift-ast';
 import { Scope, Variable } from 'shift-scope';
-import { walk } from './travelTrees';
+import { find, walk } from './travelTrees';
 
-export interface FunctionWithVariables {
-  name: string;
-  astNode: Node;
-  variables: Variable[];
-}
-
-const isFunctionExpression = (
+export const isFunctionExpression = (
   node: Node,
 ): node is ArrowExpression | FunctionExpression =>
   ['ArrowExpression', 'FunctionExpression'].includes(node.type);
@@ -28,6 +29,12 @@ export const searchFunctionVariables = (root: Node) => {
   return nameMap;
 };
 
+export interface FunctionWithVariables {
+  name: string;
+  astNode: FunctionDeclaration | ArrowExpression | FunctionExpression;
+  variables: Variable[];
+}
+
 export const getFunctionsWithVariables = (
   global: Scope,
   root: Node,
@@ -35,6 +42,9 @@ export const getFunctionsWithVariables = (
   const out: FunctionWithVariables[] = [];
   const nameMap = searchFunctionVariables(root);
   const recursion = (scope: Scope, upper: Variable[]) => {
+    const variables = scope.variableList.filter(
+      v => v.declarations.length > 0 || v.references.length > 0,
+    );
     if (
       (scope.type.name === 'ArrowFunction' &&
         scope.astNode.type === 'ArrowExpression') ||
@@ -43,7 +53,6 @@ export const getFunctionsWithVariables = (
     ) {
       const name = nameMap.get(scope.astNode);
       if (name) {
-        const variables = [...scope.variableList];
         out.push({
           name,
           astNode: scope.astNode,
@@ -55,7 +64,6 @@ export const getFunctionsWithVariables = (
       scope.type.name === 'Function' &&
       scope.astNode.type === 'FunctionDeclaration'
     ) {
-      const variables = [...scope.variableList];
       out.push({
         name: scope.astNode.name.name,
         astNode: scope.astNode,
@@ -63,10 +71,13 @@ export const getFunctionsWithVariables = (
       });
       scope.children.forEach(child => recursion(child, variables));
     } else {
-      const merged = upper.concat(scope.variableList);
+      const merged = upper.concat(variables);
       scope.children.forEach(child => recursion(child, merged));
     }
   };
   recursion(global, []);
   return out;
 };
+
+export const getParameterNames = (params: FormalParameters): string[] =>
+  find<BindingIdentifier>(params, ['BindingIdentifier']).map(p => p.name);

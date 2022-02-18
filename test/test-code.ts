@@ -1,4 +1,4 @@
-export const TINY_FUN = `
+export const TINY_FUNCTIONS = `
   function plusTwo(n) {
 		let newValue = n + 2;
 		return newValue;
@@ -15,4 +15,15 @@ export const TINY_FUN = `
 	};
 `;
 
-export const MORE_FUN = ``;
+export const BLA_CODE = `
+	function bla(n) {
+		const repeated = 'bla '.repeat(n);
+		return repeated.trim();
+	}
+	let i = 10;
+	while (i > 0) {
+		const blabla = bla(i);
+		console.log(blabla);
+		i -= 1;
+	}
+`;

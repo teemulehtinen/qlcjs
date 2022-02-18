@@ -10,19 +10,21 @@ export const shuffle = <T>(input: T[]): T[] =>
 export const pick = <T>(input: T[], n?: number): T[] =>
   shuffle(input).slice(0, n || 1);
 
-type ArrayRequest<T> = [T[], number, boolean?];
+export const notIn = <T>(input: T[], not: T[]): T[] =>
+  input.filter(e => !not.includes(e));
 
-export const pickFrom = <T>(...requests: ArrayRequest<T>[]): T[] => {
-  const out: T[] = [];
-  requests.forEach(req => {
-    out.push(...pick(req[0], req[2] ? req[1] - out.length : req[1]));
-  });
-  return out;
-};
+export type ArrayRequest<T> = [T[] | (() => T[]), number?, boolean?];
 
-type SetRequest<T> = [Set<T>, number, boolean?];
-
-export const pickFromSets = <T>(...requests: SetRequest<T>[]): T[] =>
-  pickFrom(
-    ...requests.map((r): ArrayRequest<T> => [[...r[0].values()], r[1], r[2]]),
-  );
+export const pickFrom = <T>(...requests: ArrayRequest<T>[]): T[] =>
+  requests.reduce((out, [reserve, n, fill]) => {
+    if (n !== undefined && fill && out.length >= n) {
+      return out;
+    }
+    const data = typeof reserve === 'function' ? reserve() : reserve;
+    if (n === undefined) {
+      return out.concat(data);
+    }
+    return out.concat(
+      pick(notIn([...new Set(data)], out), fill ? n - out.length : n),
+    );
+  }, new Array<T>());
