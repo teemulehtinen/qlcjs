@@ -43,4 +43,4 @@ export interface QLCOption {
 
 export interface QLC extends QLCTyped, QLCBase {}
 
-export type QLCType = 'FunctionName';
+export type QLCType = 'FunctionName' | 'ParameterName';

@@ -5,6 +5,9 @@ const texts: { [locale: string]: { [key: string]: Text } } = {
     q_function_name: 'Which is the name of the function?',
     q_function_name_line: (n: number) =>
       `Which is the name of the function that is declared on line ${n}?`,
+    q_parameter_name: 'Which are the parameter names of the function?',
+    q_parameter_name_line: (n: number) =>
+      `Which are the parameter names of the function that is declared on line ${n}?`,
   },
 };
 

@@ -12,14 +12,14 @@ const getLine = (node: Node, locations: LocationMap): number => {
 };
 
 const buildOptions = (
-  correct: string,
+  correct: string[],
   ...distractors: ArrayRequest<string>[]
 ): QLCOption[] => {
-  const opt = pickFrom([[correct]], ...distractors);
+  const opt = pickFrom([correct], ...distractors);
   return shuffle(
-    [{ answer: correct, correct: true } as QLCOption].concat(
-      opt.slice(1).map(answer => ({ answer })),
-    ),
+    correct
+      .map(answer => ({ answer, correct: true } as QLCOption))
+      .concat(opt.slice(correct.length).map(answer => ({ answer }))),
   );
 };
 
@@ -33,13 +33,39 @@ const questions: QLCTemplate[] = [
             ? t('q_function_name_line', getLine(astNode, locations))
             : t('q_function_name'),
         options: buildOptions(
-          name,
+          [name],
           [astNode.type === 'FunctionDeclaration' ? ['function'] : []],
-          [() => getParameterNames(astNode.params)],
+          [getParameterNames(astNode.params)],
           [() => variables.map(v => v.name), 4, true],
           [() => getKeywords(astNode), 5, true],
         ),
       })),
+  },
+  {
+    type: 'ParameterName',
+    prepare: ({ functions, locations }) =>
+      (functions || [])
+        .map(data => ({
+          ...data,
+          params: getParameterNames(data.astNode.params),
+        }))
+        .filter(({ params }) => params.length > 0)
+        .map(({ name, astNode, variables, params }) => () => ({
+          question:
+            functions.length > 1
+              ? t('q_parameter_name_line', getLine(astNode, locations))
+              : t('q_parameter_name'),
+          options: buildOptions(
+            params,
+            [
+              [name].concat(
+                astNode.type === 'FunctionDeclaration' ? 'function' : [],
+              ),
+            ],
+            [() => variables.map(v => v.name), 4, true],
+            [() => getKeywords(astNode), 5, true],
+          ),
+        })),
   },
 ];
 

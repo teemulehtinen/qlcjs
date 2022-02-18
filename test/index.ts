@@ -1,12 +1,20 @@
 import { suite } from 'uvu';
 import * as assert from 'uvu/assert';
 import * as mod from '../src';
+import { splitCorrectAndDistractors, overlaps, getCorrect } from './help';
 import { BLA_CODE, TINY_FUNCTIONS } from './test-code';
 
 const API = suite('exports');
 
 API('should export an object', () => {
   assert.type(mod, 'object');
+});
+
+API('should generate different question types', () => {
+  const qlcs = mod.generate(TINY_FUNCTIONS, [{ count: 10, uniqueTypes: true }]);
+  const types = qlcs.map(q => q.type);
+  assert.is([...new Set(types)].length, types.length);
+  assert.ok(types.length > 1);
 });
 
 API.run();
@@ -19,26 +27,40 @@ functionName('should detect different functions', () => {
   const qlcs = mod.generate(TINY_FUNCTIONS, [
     { count: 10, types: ['FunctionName'] },
   ]);
-  assert.is(qlcs.length, 4);
-  assert.equal(
-    new Set(
-      qlcs.flatMap(q => q.options.filter(o => o.correct).map(o => o.answer)),
-    ),
-    new Set(['plusTwo', 'summer', 'nested', 'b']),
-  );
+  assert.equal(getCorrect(qlcs), ['b', 'nested', 'plusTwo', 'summer']);
 });
 
-functionName('should generate requested distractors', () => {
-  const qlcs = mod.generate(BLA_CODE, [{ count: 1, types: ['FunctionName'] }]);
-  assert.is(qlcs.length, 1);
-  const answers = qlcs[0].options.map(o => o.answer);
-  assert.is(answers.length, 5);
-  ['bla', 'function', 'n', 'repeated'].forEach(a =>
-    assert.ok(answers.includes(a)),
+functionName('should generate distractors', () => {
+  const { correct, distractors } = splitCorrectAndDistractors(
+    mod.generate(BLA_CODE, [{ count: 1, types: ['FunctionName'] }])[0],
   );
-  assert.ok(answers.includes('const') || answers.includes('return'));
+  assert.equal(correct, ['bla']);
+  assert.ok(
+    overlaps(distractors, ['function', 'n', 'repeated', 'const', 'return']),
+  );
 });
 
 functionName.run();
 
 // ---
+
+const parameterName = suite('ParameterName');
+
+parameterName('should detect different parameters', () => {
+  const qlcs = mod.generate(TINY_FUNCTIONS, [
+    { count: 10, types: ['ParameterName'] },
+  ]);
+  assert.equal(getCorrect(qlcs), ['a', 'b', 'i', 'n']);
+});
+
+parameterName('should generate distractors', () => {
+  const { correct, distractors } = splitCorrectAndDistractors(
+    mod.generate(BLA_CODE, [{ count: 1, types: ['ParameterName'] }])[0],
+  );
+  assert.equal(correct, ['n']);
+  assert.ok(
+    overlaps(distractors, ['bla', 'function', 'repeated', 'const', 'return']),
+  );
+});
+
+parameterName.run();
