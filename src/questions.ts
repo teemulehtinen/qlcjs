@@ -10,6 +10,11 @@ import {
   sortNumberOrString,
 } from './arrays';
 import { getParameterNames } from './getFunctions';
+import {
+  getVariables,
+  parseReferences,
+  VariableDeclarations,
+} from './getVariables';
 import { getKeywords } from './getKeywords';
 import { loopNodes, literalValues, lastBlockNode } from './travelTrees';
 import t from './i18n';
@@ -122,6 +127,30 @@ const questions: QLCTemplate[] = [
           options: buildOptions([end], [lines, 8, true]),
         };
       }),
+  },
+  {
+    type: 'VariableDeclaration',
+    prepare: ({ scope, locations }) =>
+      parseReferences(
+        getVariables(scope, VariableDeclarations),
+        locations,
+        true,
+      )
+        .filter(({ reads, writes }) => reads.length > 0 || writes.length > 0)
+        .map(({ name, declaration, reads, writes }) => () => {
+          const isWrite = writes.length > 0;
+          const ref = pickOne(isWrite ? writes : reads);
+          return {
+            question: t(
+              isWrite
+                ? 'q_variable_write_declaration'
+                : 'q_variable_read_declaration',
+              name,
+              ref.line,
+            ),
+            options: buildOptions([declaration.line]),
+          };
+        }),
   },
 ];
 

@@ -97,3 +97,16 @@ loopEnd('should detect loop lines', () => {
 });
 
 loopEnd.run();
+
+// ---
+
+const variableDeclaration = suite('VariableDeclaration');
+
+variableDeclaration('should detect different variables', () => {
+  const qlcs = mod.generate(BLA_CODE, [
+    { count: 10, types: ['VariableDeclaration'] },
+  ]);
+  qlcs.forEach(qlc => console.log(qlc));
+});
+
+variableDeclaration.run();

@@ -11,9 +11,13 @@ const texts: { [locale: string]: { [key: string]: TextEntry } } = {
     q_parameter_name_line: (...args) =>
       `Which are the parameter names of the function that is declared on line ${args[0]}?`,
     q_parameter_value: (...args) =>
-      `Which value does ${args[0]} have when execution of ${args[1]} starts?`,
+      `Which value does <em>${args[0]}</em> have when execution of <em>${args[1]}</em> starts?`,
     q_loop_end: (...args) =>
       `A program loop starts on line ${args[0]}. Which is the last line inside it?`,
+    q_variable_write_declaration: (...args) =>
+      `A value is assigned to variable <em>${args[0]}</em> on line ${args[1]}. On which line is <em>${args[0]}</em> declared?`,
+    q_variable_read_declaration: (...args) =>
+      `A value is accessed from variable <em>${args[0]}</em> on line ${args[1]}. On which line is <em>${args[0]}</em> declared?`,
   },
 };
 

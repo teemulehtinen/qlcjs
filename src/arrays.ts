@@ -10,13 +10,10 @@ export const shuffle = <T>(input: T[]): T[] =>
 export const pick = <T>(input: T[], n?: number): T[] =>
   shuffle(input).slice(0, n);
 
-export const pickIndex = <T>(input: T[]): number | undefined =>
-  input.length === 0 ? undefined : Math.floor(Math.random() * input.length);
+export const pickIndex = <T>(input: T[]): number =>
+  Math.floor(Math.random() * input.length);
 
-export const pickOne = <T>(input: T[]): T | undefined => {
-  const i = pickIndex(input);
-  return i === undefined ? undefined : input[i];
-};
+export const pickOne = <T>(input: T[]): T => input[pickIndex(input)];
 
 export const notIn = <T>(input: T[], not: T[]): T[] =>
   input.filter(e => !not.includes(e));
