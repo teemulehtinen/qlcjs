@@ -1,3 +1,6 @@
+export const range = (b: number, e: number): number[] =>
+  [...Array(e - b + 1).keys()].map(i => b + i);
+
 export const asArray = <T>(input: T | T[]): T[] =>
   Array.isArray(input) ? input : [input];
 

@@ -7,6 +7,7 @@ import {
   pickFrom,
   pickIndex,
   pickOne,
+  range,
   sortNumberOrString,
 } from './arrays';
 import { getParameterNames } from './getFunctions';
@@ -119,9 +120,7 @@ const questions: QLCTemplate[] = [
       loopNodes(tree).map(loop => () => {
         const beg = getLine(loop, locations);
         const end = getLine(lastBlockNode(loop.body), locations, true);
-        const lines = [...Array(end - beg + 1).keys()]
-          .map(i => beg - 1 + i)
-          .concat(end + 2);
+        const lines = range(beg - 1, end - 1).concat(end + 2);
         return {
           question: t('q_loop_end', beg),
           options: buildOptions([end], [lines, 8, true]),
@@ -140,6 +139,7 @@ const questions: QLCTemplate[] = [
         .map(({ name, declaration, reads, writes }) => () => {
           const isWrite = writes.length > 0;
           const ref = pickOne(isWrite ? writes : reads);
+          const refLines = reads.concat(writes).map(r => r.line);
           return {
             question: t(
               isWrite
@@ -148,7 +148,11 @@ const questions: QLCTemplate[] = [
               name,
               ref.line,
             ),
-            options: buildOptions([declaration.line]),
+            options: buildOptions(
+              [declaration.line],
+              [refLines, 5, true],
+              [range(declaration.line - 2, Math.max(...refLines) + 2), 5, true],
+            ),
           };
         }),
   },

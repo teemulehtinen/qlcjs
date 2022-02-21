@@ -103,10 +103,26 @@ loopEnd.run();
 const variableDeclaration = suite('VariableDeclaration');
 
 variableDeclaration('should detect different variables', () => {
+  const qlcs = mod.generate(TINY_FUNCTIONS, [
+    { count: 10, types: ['VariableDeclaration'] },
+  ]);
+  assert.equal(getCorrect(qlcs), [10, 3]);
+});
+
+variableDeclaration('should generate distractors', () => {
   const qlcs = mod.generate(BLA_CODE, [
     { count: 10, types: ['VariableDeclaration'] },
   ]);
-  qlcs.forEach(qlc => console.log(qlc));
+  const qlci = qlcs.find(
+    q => q.options.find(o => o.correct && o.answer === 6) !== undefined,
+  );
+  assert.ok(qlci !== undefined);
+  assert.ok(
+    overlaps(
+      [7, 8, 10],
+      qlci.options.map(o => o.answer),
+    ),
+  );
 });
 
 variableDeclaration.run();
