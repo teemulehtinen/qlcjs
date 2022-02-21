@@ -2,7 +2,6 @@ import {
   ForInStatement,
   ForOfStatement,
   ForStatement,
-  IfStatement,
   LiteralBooleanExpression,
   LiteralNumericExpression,
   LiteralStringExpression,
