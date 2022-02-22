@@ -2,7 +2,7 @@
   "version": "0.0.0",
   "name": "qlcjs",
   "repository": "https://github.com/teemulehtinen/qlcjs.git",
-  "unpkg": "dist/index.min.js",
+  "unpkg": "dist/qlcjs.min.js",
   "module": "dist/index.mjs",
   "main": "dist/index.js",
   "types": "types/index.d.ts",
@@ -39,6 +39,7 @@
     "keywords"
   ],
   "devDependencies": {
+    "@rollup/plugin-commonjs": "^21.0.1",
     "@rollup/plugin-node-resolve": "13.1.3",
     "@typescript-eslint/eslint-plugin": "^5.11.0",
     "@typescript-eslint/parser": "^5.11.0",
