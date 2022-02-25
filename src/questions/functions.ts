@@ -60,7 +60,7 @@ export const parameterName: QLCPrepararer = ({ functions, locations }) =>
         ),
         options(name, 'function_name', t('o_parameter_function_name')),
         astNode.type === 'FunctionDeclaration'
-          ? options('function', 'keyword', t('o_function_fuction'))
+          ? options('function', 'keyword', t('o_function_function'))
           : undefined,
         fillRandomOptions(
           4,

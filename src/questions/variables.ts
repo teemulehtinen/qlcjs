@@ -14,7 +14,7 @@ export const variableDeclaration: QLCPrepararer = ({ scope, locations }) =>
     .map(({ name, declaration, reads, writes }) => () => {
       const isWrite = writes.length > 0;
       const ref = pickOne(isWrite ? writes : reads);
-      const refLines = reads.concat(writes).map(r => r.line);
+      const refLines = [...new Set(reads.concat(writes).map(r => r.line))];
       return {
         question: t(
           isWrite
