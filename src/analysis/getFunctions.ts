@@ -7,7 +7,7 @@ import {
 } from 'shift-ast';
 import { Scope, Variable } from 'shift-scope';
 import { find, walk } from './travelTrees';
-import { FunctionWithVariables } from './types';
+import { FunctionWithVariables } from '../types';
 
 export const isFunctionExpression = (
   node: Node,

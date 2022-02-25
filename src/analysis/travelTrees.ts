@@ -9,7 +9,7 @@ import {
   WhileStatement,
 } from 'shift-ast';
 import children from './travelChildren';
-import { isNode } from './types';
+import { isNode } from '../types';
 
 export type Visitor = (node: Node, stack: Node[]) => boolean | void;
 

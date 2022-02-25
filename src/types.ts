@@ -7,7 +7,7 @@ import {
 } from 'shift-ast';
 import { Comment, LocationMap } from 'shift-parser';
 import { Scope, Variable } from 'shift-scope';
-import { SimpleValue } from './simpleValues';
+import { SimpleValue } from './helpers/simpleValues';
 
 export const isNode = <T extends Node>(
   node: Node,
@@ -19,8 +19,10 @@ export interface QLCTyped {
 }
 
 export interface QLCTemplate extends QLCTyped {
-  prepare: (model: ProgramModel) => QLCGenerator[];
+  prepare: QLCPrepararer;
 }
+
+export type QLCPrepararer = (model: ProgramModel) => QLCGenerator[];
 
 export interface QLCPrepared extends QLCTyped {
   key: number;
@@ -55,8 +57,10 @@ export interface QLCBase {
 }
 
 export interface QLCOption {
+  type: string;
   answer: string | number;
   correct?: boolean;
+  info?: string;
 }
 
 export interface QLC extends QLCTyped, QLCBase {}

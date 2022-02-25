@@ -18,12 +18,17 @@ export const pickIndex = <T>(input: T[]): number =>
 
 export const pickOne = <T>(input: T[]): T => input[pickIndex(input)];
 
-export const notIn = <T>(input: T[], not: T[]): T[] =>
-  input.filter(e => !not.includes(e));
+export const notIn = <T>(input: T[], not: T[], key: (e: T) => string): T[] => {
+  const notKeys = not.map(e => key(e));
+  return input.filter(e => !notKeys.includes(key(e)));
+};
 
 export type ArrayRequest<T> = [T[] | (() => T[]), number?, boolean?];
 
-export const pickFrom = <T>(...requests: ArrayRequest<T>[]): T[] =>
+export const pickFrom = <T>(
+  key: (e: T) => string,
+  ...requests: ArrayRequest<T>[]
+): T[] =>
   requests.reduce((out, [reserve, n, fill]) => {
     if (n !== undefined && fill && out.length >= n) {
       return out;
@@ -31,6 +36,7 @@ export const pickFrom = <T>(...requests: ArrayRequest<T>[]): T[] =>
     const data = notIn(
       [...new Set(typeof reserve === 'function' ? reserve() : reserve)],
       out,
+      key,
     );
     if (n === undefined) {
       return out.concat(data);

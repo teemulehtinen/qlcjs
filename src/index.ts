@@ -8,9 +8,9 @@ import {
   QLCTyped,
   SuggestedInput,
 } from './types';
+import { pickOne } from './helpers/arrays';
+import { getFunctionsWithVariables } from './analysis/getFunctions';
 import questions from './questions';
-import { getFunctionsWithVariables } from './getFunctions';
-import { pickOne } from './arrays';
 
 export { QLC, QLCType, SuggestedInput } from './types';
 
