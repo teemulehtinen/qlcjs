@@ -104,7 +104,7 @@ export const parameterValue: QLCPrepararer = ({ functions, inputs }) =>
           options(
             inputParams,
             'wrong_parameter_value',
-            t('o_parameter_value_incorrect'),
+            t('o_parameter_value_other'),
           ),
           options(
             params[paramIndex],
@@ -120,6 +120,7 @@ export const parameterValue: QLCPrepararer = ({ functions, inputs }) =>
           fillRandomOptions(
             5,
             () => finputs.map(d => simpleToProgram(d[paramIndex])),
+            'random_value',
             t('o_parameter_value_random'),
           ),
         ),
