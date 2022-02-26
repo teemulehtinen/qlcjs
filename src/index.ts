@@ -8,7 +8,7 @@ import {
   QLCTyped,
   SuggestedInput,
 } from './types';
-import { pickOne } from './helpers/arrays';
+import { pickIndex } from './helpers/arrays';
 import { getFunctionsWithVariables } from './analysis/getFunctions';
 import questions from './questions';
 
@@ -72,13 +72,15 @@ export const generate = (
 ): QLC[] => {
   const r = requests || [{ count: 1 }];
   let prepared = prepare(source, allUsedTypes(r), inputs);
-  const out: QLC[] = [];
+  const out: [number, QLC][] = [];
   r.forEach(({ count, fill, types, uniqueTypes }) => {
     let targetCount = fill ? count - out.length : count;
     while (targetCount > 0 && prepared.length > 0) {
-      const picked = pickOne(selectByType(prepared, types));
+      const sample = selectByType(prepared, types);
+      const i = pickIndex(sample);
+      const picked = sample[i];
       if (picked) {
-        out.push({ type: picked.type, ...picked.generate() });
+        out.push([i, { type: picked.type, ...picked.generate() }]);
         if (uniqueTypes) {
           prepared = prepared.filter(({ type }) => type !== picked.type);
         } else {
@@ -88,5 +90,5 @@ export const generate = (
       targetCount -= 1;
     }
   });
-  return out;
+  return out.sort((a, b) => a[0] - b[0]).map(o => o[1]);
 };
