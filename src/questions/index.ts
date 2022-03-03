@@ -1,7 +1,7 @@
 import { QLCTemplate } from '../types';
 import { functionName, parameterName, parameterValue } from './functions';
-import { loopEnd } from './blocks';
-import { variableDeclaration } from './variables';
+import { loopEnd, variableDeclaration } from './lines';
+import { methodCall } from './naming';
 
 const questions: QLCTemplate[] = [
   {
@@ -23,6 +23,10 @@ const questions: QLCTemplate[] = [
   {
     type: 'VariableDeclaration',
     prepare: variableDeclaration,
+  },
+  {
+    type: 'MethodCall',
+    prepare: methodCall,
   },
 ];
 

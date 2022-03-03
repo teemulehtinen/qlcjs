@@ -126,3 +126,14 @@ variableDeclaration('should generate distractors', () => {
 });
 
 variableDeclaration.run();
+
+// ---
+
+const methodCall = suite('MethodCall');
+
+methodCall('should detect method calls', () => {
+  const qlcs = mod.generate(BLA_CODE, [{ count: 10, types: ['MethodCall'] }]);
+  assert.equal(getCorrect(qlcs), ['method', 'method', 'method']);
+});
+
+methodCall.run();

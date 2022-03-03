@@ -1,11 +1,11 @@
 import { QLCPrepararer } from '../types';
-import { simpleToProgram } from '../helpers/simpleValues';
-import { pickIndex, pickOne } from '../helpers/arrays';
-import { literalValues } from '../analysis/travelTrees';
+import { literalValues } from '../analysis/select';
 import { getParameterNames } from '../analysis/getFunctions';
 import { getKeywords } from '../analysis/getKeywords';
 import { getLine } from '../analysis/getLine';
 import { pickOptions, options, fillRandomOptions } from './options';
+import { simpleToProgram } from '../helpers/simpleValues';
+import { pickIndex, pickOne } from '../helpers/arrays';
 import t from '../i18n';
 
 export const functionName: QLCPrepararer = ({ functions, locations }) =>

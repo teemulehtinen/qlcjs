@@ -70,4 +70,5 @@ export type QLCType =
   | 'ParameterName'
   | 'ParameterValue'
   | 'LoopEnd'
-  | 'VariableDeclaration';
+  | 'VariableDeclaration'
+  | 'MethodCall';

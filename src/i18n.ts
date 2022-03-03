@@ -57,6 +57,19 @@ const texts: { [locale: string]: { [key: string]: TextEntry } } = {
       'This line references (reads or writes) the given variable BUT it is declared before',
     o_variable_declaration_random:
       'This is a random line that does not handle the given variable',
+
+    q_method_call: (...args) =>
+      `Which best describes <em>${args[0]}</em> on line ${args[1]}?`,
+    o_method_correct:
+      'Correct, it calls a method of an object (method is a function declared for the object)',
+    o_name_argument:
+      'No, arguments are values or expressions given for a function/method call (inside parenthesis)',
+    o_name_keyword:
+      'No, keyword/command describes a word that is reserved for describing program structure and cannot be used as a name',
+    o_name_operator:
+      'No, programs have typically arithmetic, comparison, and logical operators e.g. +, ===, or &&',
+    o_name_parameter:
+      'No, parameters are used to name inputs when functions are declared',
   },
 };
 
