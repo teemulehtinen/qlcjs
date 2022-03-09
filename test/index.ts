@@ -1,8 +1,11 @@
 import { suite } from 'uvu';
 import * as assert from 'uvu/assert';
+import { parseScriptWithLocation } from 'shift-parser';
+import analyze from 'shift-scope';
 import * as mod from '../src';
 import { splitCorrectAndDistractors, overlaps, getCorrect } from './help';
 import { BLA_CODE, TINY_FUNCTIONS } from './test-code';
+import { recordedScript } from '../src/executor';
 
 const API = suite('exports');
 
@@ -92,7 +95,7 @@ const loopEnd = suite('LoopEnd');
 loopEnd('should detect loop lines', () => {
   const qlc = mod.generate(BLA_CODE, [{ count: 1, types: ['LoopEnd'] }])[0];
   const { correct, distractors } = splitCorrectAndDistractors(qlc);
-  assert.equal(correct, [10]);
+  assert.equal(correct, [11]);
   assert.ok(distractors.length > 0);
 });
 
@@ -119,7 +122,7 @@ variableDeclaration('should generate distractors', () => {
   assert.ok(qlci !== undefined);
   assert.ok(
     overlaps(
-      [7, 8, 10],
+      [7, 8, 9, 11],
       qlci.options.map(o => o.answer),
     ),
   );
@@ -137,3 +140,16 @@ methodCall('should detect method calls', () => {
 });
 
 methodCall.run();
+
+// ---
+
+const executor = suite('Executor');
+
+executor('should transform variable statements', () => {
+  const { tree } = parseScriptWithLocation(BLA_CODE);
+  const scope = analyze(tree);
+  const { recordedTree, variables } = recordedScript(tree, scope);
+  console.log(variables);
+});
+
+executor.run();

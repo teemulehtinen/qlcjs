@@ -20,7 +20,8 @@ export const BLA_CODE = `
 		const repeated = 'bla '.repeat(n);
 		return repeated.trim();
 	}
-	let i = 10;
+	let i;
+	i = 5;
 	while (i > 0) {
 		const blabla = bla(i);
 		console.log(blabla);

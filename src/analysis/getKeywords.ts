@@ -1,5 +1,5 @@
 import { Node } from 'shift-ast';
-import { flat } from './travelTrees';
+import { flat } from '../trees/travel';
 
 export const keyword = (n: Node): string[] => {
   switch (n.type) {

@@ -11,7 +11,7 @@ import {
   WhileStatement,
 } from 'shift-ast';
 import { isNode } from '../types';
-import { find } from './travelTrees';
+import { find } from '../trees/travel';
 
 export type SimpleLiterals =
   | LiteralBooleanExpression
