@@ -148,8 +148,8 @@ const executor = suite('Executor');
 executor('should transform variable statements', () => {
   const { tree } = parseScriptWithLocation(BLA_CODE);
   const scope = analyze(tree);
-  const { recordedTree, variables } = recordedScript(tree, scope);
-  console.log(variables);
+  const { script, variables } = recordedScript(tree, scope);
+  console.log(script);
 });
 
 executor.run();

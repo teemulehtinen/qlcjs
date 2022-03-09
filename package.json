@@ -59,6 +59,7 @@
   },
   "dependencies": {
     "shift-ast": "^6.1.0",
+    "shift-codegen": "^7.0.3",
     "shift-parser": "^7.0.3",
     "shift-scope": "^5.0.0"
   }

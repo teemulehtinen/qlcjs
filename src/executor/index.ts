@@ -9,6 +9,7 @@ import {
   VariableDeclarator,
 } from 'shift-ast';
 import { Scope, Variable } from 'shift-scope';
+import codegen, { FormattedCodeGen } from 'shift-codegen';
 import { getVariables, VariableDeclarations } from '../analysis/getVariables';
 import transform from '../trees/transform';
 import { unpackCompoundExpression } from './compound';
@@ -46,7 +47,7 @@ const valueRecordExpression = (
     ],
   });
 
-export const recordedScript = (tree: Node, global: Scope) => {
+export const recordedScript = (root: Node, global: Scope) => {
   const variables: RecordableVariable[] = getVariables(
     global,
     VariableDeclarations,
@@ -58,7 +59,7 @@ export const recordedScript = (tree: Node, global: Scope) => {
       .map(({ node }) => node),
     recorded: [],
   }));
-  const recordedTree = transform(tree, (node: Node): Node => {
+  const tree = transform(root, (node: Node): Node => {
     switch (node.type) {
       case 'VariableDeclarator':
         if (node.binding.type === 'BindingIdentifier' && node.init) {
@@ -106,7 +107,8 @@ export const recordedScript = (tree: Node, global: Scope) => {
     }
   });
   return {
-    recordedTree,
+    tree,
+    script: codegen(tree, new FormattedCodeGen()),
     variables: variables.filter(
       ({ writes, recorded }) =>
         recorded.length > 0 && recorded.length === writes.length,
