@@ -6,13 +6,17 @@ import {
   LiteralNumericExpression,
   LiteralStringExpression,
   Node,
+  UpdateExpression,
   VariableDeclarator,
 } from 'shift-ast';
 import { Scope, Variable } from 'shift-scope';
 import codegen, { FormattedCodeGen } from 'shift-codegen';
 import { getVariables, VariableDeclarations } from '../analysis/getVariables';
 import transform from '../trees/transform';
-import { unpackCompoundExpression } from './compound';
+import {
+  unpackAssignmentIdentifier,
+  unpackCompoundExpression,
+} from './compound';
 import { simpleToProgram, SimpleValue } from '../helpers/simpleValues';
 
 const RECORD_FUNCTION = '__record';
@@ -39,14 +43,23 @@ const valueRecordExpression = (
   index: number,
   name: string,
   value: Expression,
+  recordValue?: Expression,
 ): CallExpression =>
   new CallExpression({
     callee: new IdentifierExpression({ name: RECORD_FUNCTION }),
-    arguments: [
-      new LiteralNumericExpression({ value: index }),
-      new LiteralStringExpression({ value: name }),
-      value,
-    ],
+    arguments:
+      recordValue !== undefined
+        ? [
+            new LiteralNumericExpression({ value: index }),
+            new LiteralStringExpression({ value: name }),
+            value,
+            recordValue,
+          ]
+        : [
+            new LiteralNumericExpression({ value: index }),
+            new LiteralStringExpression({ value: name }),
+            value,
+          ],
   });
 
 export const transformToRecorded = (root: Node, global: Scope) => {
@@ -104,6 +117,26 @@ export const transformToRecorded = (root: Node, global: Scope) => {
           }
         }
         return node;
+      case 'UpdateExpression':
+        if (node.operand.type === 'AssignmentTargetIdentifier') {
+          const v = checkWriteNode(node.operand, variables);
+          if (v !== undefined) {
+            if (node.isPrefix) {
+              return valueRecordExpression(v.index, v.name, node);
+            }
+            return valueRecordExpression(
+              v.index,
+              v.name,
+              unpackAssignmentIdentifier(node.operand),
+              new UpdateExpression({
+                isPrefix: true,
+                operator: node.operator,
+                operand: node.operand,
+              }),
+            );
+          }
+        }
+        return node;
       default:
         return node;
     }
@@ -127,9 +160,9 @@ export const evaluateRecorded = (
   // eslint-disable-next-line no-new-func
   return new Function(`
     ${RECORD_STORE} = {};
-    ${RECORD_FUNCTION} = (index, name, value) => {
+    ${RECORD_FUNCTION} = (index, name, value, rec) => {
       const key = index + '_' + name;
-      ${RECORD_STORE}[key] = (${RECORD_STORE}[key] || []).concat(value);
+      ${RECORD_STORE}[key] = (${RECORD_STORE}[key] || []).concat(rec || value);
       return value;
     };
     ${script}
