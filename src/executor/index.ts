@@ -13,10 +13,12 @@ import codegen, { FormattedCodeGen } from 'shift-codegen';
 import { getVariables, VariableDeclarations } from '../analysis/getVariables';
 import transform from '../trees/transform';
 import { unpackCompoundExpression } from './compound';
+import { simpleToProgram, SimpleValue } from '../helpers/simpleValues';
 
 const RECORD_FUNCTION = '__record';
+const RECORD_STORE = '__record_store';
 
-interface RecordableVariable extends Variable {
+export interface RecordableVariable extends Variable {
   index: number;
   writes: Node[];
   recorded: Node[];
@@ -47,7 +49,7 @@ const valueRecordExpression = (
     ],
   });
 
-export const recordedScript = (root: Node, global: Scope) => {
+export const transformToRecorded = (root: Node, global: Scope) => {
   const variables: RecordableVariable[] = getVariables(
     global,
     VariableDeclarations,
@@ -116,8 +118,33 @@ export const recordedScript = (root: Node, global: Scope) => {
   };
 };
 
-export const evalAndExtract = () => {
-  // Call eval
-  // Access global records
-  return undefined;
+export const evaluateRecorded = (
+  script: string,
+  functionName: string,
+  functionArguments: SimpleValue[],
+): { [k: string]: SimpleValue[] } => {
+  const argstr = functionArguments.map(simpleToProgram).join(', ');
+  // eslint-disable-next-line no-new-func
+  return new Function(`
+    ${RECORD_STORE} = {};
+    ${RECORD_FUNCTION} = (index, name, value) => {
+      const key = index + '_' + name;
+      ${RECORD_STORE}[key] = (${RECORD_STORE}[key] || []).concat(value);
+      return value;
+    };
+    ${script}
+    ;${functionName}(${argstr});
+    return ${RECORD_STORE};
+  `)();
+};
+
+export const recordVariableHistory = (
+  root: Node,
+  global: Scope,
+  functionName: string,
+  functionArguments: SimpleValue[],
+) => {
+  const { script, variables } = transformToRecorded(root, global);
+  const history = evaluateRecorded(script, functionName, functionArguments);
+  return { arguments: functionArguments, variables, history };
 };

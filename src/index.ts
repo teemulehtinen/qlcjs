@@ -4,19 +4,25 @@ import {
   ProgramModel,
   QLC,
   QLCPrepared,
+  QLCTemplate,
   QLCType,
   QLCTyped,
-  SuggestedInput,
+  ProgramInput,
 } from './types';
-import { pickIndex } from './helpers/arrays';
+import { pickIndex, pickOne } from './helpers/arrays';
 import { getFunctionsWithVariables } from './analysis/getFunctions';
 import questions from './questions';
+import { recordVariableHistory } from './executor';
 
-export { QLC, QLCType, SuggestedInput } from './types';
+export { QLC, QLCType, QLCPrepared, ProgramInput, ProgramModel } from './types';
+export { SimpleValue } from './helpers/simpleValues';
+export { transformToRecorded, evaluateRecorded } from './executor';
 
 export const createProgramModel = (
   source: string,
-  inputs?: SuggestedInput[],
+  input?: ProgramInput,
+  getFunctions?: boolean,
+  recordEvaluation?: boolean,
 ): ProgramModel => {
   const { tree, locations, comments } = parseScriptWithLocation(source);
   const scope = analyze(tree);
@@ -25,8 +31,19 @@ export const createProgramModel = (
     locations,
     comments,
     scope,
-    functions: getFunctionsWithVariables(scope, tree),
-    inputs: inputs || [],
+    input,
+    functions: getFunctions
+      ? getFunctionsWithVariables(scope, tree)
+      : undefined,
+    recorded:
+      recordEvaluation && input
+        ? recordVariableHistory(
+            tree,
+            scope,
+            input.functionName,
+            pickOne(input.arguments),
+          )
+        : undefined,
   };
 };
 
@@ -35,13 +52,25 @@ const selectByType = <T extends QLCTyped>(
   select: QLCType[] | undefined,
 ) => (select ? elements.filter(({ type }) => select.includes(type)) : elements);
 
+const isFunctions = (templates: QLCTemplate[]) =>
+  templates.find(t => t.wantsFunctions) !== undefined;
+
+const isEvaluated = (templates: QLCTemplate[]) =>
+  templates.find(t => t.wantsRecordedEvaluation) !== undefined;
+
 export const prepare = (
   source: string,
   select?: QLCType[],
-  inputs?: SuggestedInput[],
+  input?: ProgramInput,
 ): QLCPrepared[] => {
-  const data = createProgramModel(source, inputs);
-  return selectByType(questions, select)
+  const templates = selectByType(questions, select);
+  const data = createProgramModel(
+    source,
+    input,
+    isFunctions(templates),
+    isEvaluated(templates),
+  );
+  return templates
     .flatMap(({ type, prepare: prepareTemplate }) =>
       prepareTemplate(data).map(generate => ({
         type,
@@ -68,10 +97,10 @@ export interface QLCRequest {
 export const generate = (
   source: string,
   requests?: QLCRequest[],
-  inputs?: SuggestedInput[],
+  input?: ProgramInput,
 ): QLC[] => {
   const r = requests || [{ count: 1 }];
-  let prepared = prepare(source, allUsedTypes(r), inputs);
+  let prepared = prepare(source, allUsedTypes(r), input);
   const out: [number, QLC][] = [];
   r.forEach(({ count, fill, types, uniqueTypes }) => {
     let targetCount = fill ? count - out.length : count;

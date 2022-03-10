@@ -1,11 +1,8 @@
 import { suite } from 'uvu';
 import * as assert from 'uvu/assert';
-import { parseScriptWithLocation } from 'shift-parser';
-import analyze from 'shift-scope';
 import * as mod from '../src';
 import { splitCorrectAndDistractors, overlaps, getCorrect } from './help';
 import { BLA_CODE, TINY_FUNCTIONS } from './test-code';
-import { recordedScript } from '../src/executor';
 
 const API = suite('exports');
 
@@ -78,7 +75,7 @@ parameterValue('should generate answers to match description', () => {
   const qlc = mod.generate(
     BLA_CODE,
     [{ count: 1, types: ['ParameterValue'] }],
-    [{ functionName: 'bla', parameters: [[1], [2], [3], [4], [5]] }],
+    { functionName: 'bla', arguments: [[1], [2], [3], [4], [5]] },
   )[0];
   const { correct, distractors } = splitCorrectAndDistractors(qlc);
   assert.ok(qlc.question.includes(`${correct[0]}`));
@@ -143,13 +140,36 @@ methodCall.run();
 
 // ---
 
+const variableTrace = suite('VariableTrace');
+
+variableTrace.run();
+
+// ---
+
 const executor = suite('Executor');
 
 executor('should transform variable statements', () => {
-  const { tree } = parseScriptWithLocation(BLA_CODE);
-  const scope = analyze(tree);
-  const { script, variables } = recordedScript(tree, scope);
-  console.log(script);
+  const input: mod.ProgramInput = { functionName: 'bla', arguments: [[2]] };
+  const { tree, scope } = mod.createProgramModel(BLA_CODE, input);
+  const { script, variables } = mod.transformToRecorded(tree, scope);
+  assert.equal(variables.map(({ name }) => name).sort(), [
+    'blabla',
+    'i',
+    'repeated',
+  ]);
+  assert.ok(script.includes('__record(0, "i",'));
+});
+
+executor('should evaluate and record variable history', () => {
+  const input: mod.ProgramInput = { functionName: 'bla', arguments: [[2]] };
+  const { tree, scope } = mod.createProgramModel(BLA_CODE, input);
+  const { script } = mod.transformToRecorded(tree, scope);
+  const record = mod.evaluateRecorded(
+    script,
+    input.functionName,
+    input.arguments[0],
+  );
+  assert.equal(record['0_i'], [5, 4, 3, 2, 1, 0]);
 });
 
 executor.run();

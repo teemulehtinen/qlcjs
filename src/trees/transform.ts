@@ -1,4 +1,3 @@
-/* eslint-disable no-param-reassign */
 import { Node } from 'shift-ast';
 import transformChildren, { Transformer } from './transformChildren';
 

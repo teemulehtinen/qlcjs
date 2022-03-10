@@ -7,6 +7,7 @@ import {
 } from 'shift-ast';
 import { Comment, LocationMap } from 'shift-parser';
 import { Scope, Variable } from 'shift-scope';
+import { RecordableVariable } from './executor';
 import { SimpleValue } from './helpers/simpleValues';
 
 export const isNode = <T extends Node>(
@@ -20,6 +21,8 @@ export interface QLCTyped {
 
 export interface QLCTemplate extends QLCTyped {
   prepare: QLCPrepararer;
+  wantsFunctions?: boolean;
+  wantsRecordedEvaluation?: boolean;
 }
 
 export type QLCPrepararer = (model: ProgramModel) => QLCGenerator[];
@@ -34,19 +37,24 @@ export interface ProgramModel {
   locations: LocationMap;
   comments: Comment[];
   scope: Scope;
-  functions: FunctionWithVariables[];
-  inputs: SuggestedInput[];
+  input?: ProgramInput;
+  functions?: FunctionWithVariables[];
+  recorded?: {
+    arguments: SimpleValue[];
+    variables: RecordableVariable[];
+    history: { [k: string]: SimpleValue[] };
+  };
+}
+
+export interface ProgramInput {
+  functionName: string;
+  arguments: SimpleValue[][];
 }
 
 export interface FunctionWithVariables {
   name: string;
   astNode: FunctionDeclaration | ArrowExpression | FunctionExpression;
   variables: Variable[];
-}
-
-export interface SuggestedInput {
-  functionName: string;
-  parameters: SimpleValue[][];
 }
 
 export type QLCGenerator = () => QLCBase;
@@ -71,4 +79,5 @@ export type QLCType =
   | 'ParameterValue'
   | 'LoopEnd'
   | 'VariableDeclaration'
-  | 'MethodCall';
+  | 'MethodCall'
+  | 'VariableTrace';

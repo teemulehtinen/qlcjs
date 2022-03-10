@@ -8,8 +8,11 @@ import { simpleToProgram } from '../helpers/simpleValues';
 import { pickIndex, pickOne } from '../helpers/arrays';
 import t from '../i18n';
 
-export const functionName: QLCPrepararer = ({ functions, locations }) =>
-  (functions || []).map(({ name, astNode, variables }) => () => ({
+export const functionName: QLCPrepararer = ({ functions, locations }) => {
+  if (functions === undefined) {
+    return [];
+  }
+  return functions.map(({ name, astNode, variables }) => () => ({
     question:
       functions.length > 1
         ? t('q_function_name_line', getLine(astNode, locations))
@@ -38,9 +41,13 @@ export const functionName: QLCPrepararer = ({ functions, locations }) =>
       ),
     ),
   }));
+};
 
-export const parameterName: QLCPrepararer = ({ functions, locations }) =>
-  (functions || [])
+export const parameterName: QLCPrepararer = ({ functions, locations }) => {
+  if (functions === undefined) {
+    return [];
+  }
+  return functions
     .map(data => ({
       ...data,
       params: getParameterNames(data.astNode.params),
@@ -76,36 +83,36 @@ export const parameterName: QLCPrepararer = ({ functions, locations }) =>
         ),
       ),
     }));
+};
 
-export const parameterValue: QLCPrepararer = ({ functions, inputs }) =>
-  (functions || [])
+export const parameterValue: QLCPrepararer = ({ functions, input }) => {
+  if (functions === undefined || input === undefined) {
+    return [];
+  }
+  return functions
     .map(data => ({
       ...data,
       params: getParameterNames(data.astNode.params),
-      finputs: inputs.find(i => i.functionName === data.name)?.parameters || [],
+      argOpt: input.functionName === data.name ? input.arguments : [],
     }))
-    .filter(({ params, finputs }) => params.length > 0 && finputs.length > 0)
-    .map(({ name, astNode, params, finputs }) => () => {
+    .filter(({ params, argOpt }) => params.length > 0 && argOpt.length > 0)
+    .map(({ name, astNode, params, argOpt }) => () => {
       const paramIndex = pickIndex(params) || 0;
-      const inputParams = (pickOne(finputs) || []).map(simpleToProgram);
+      const args = (pickOne(argOpt) || []).map(simpleToProgram);
       return {
         question: t(
           'q_parameter_value',
           params[paramIndex],
-          `${name}(${inputParams.join(', ')})`,
+          `${name}(${args.join(', ')})`,
         ),
         options: pickOptions(
           options(
-            inputParams[paramIndex],
+            args[paramIndex],
             'parameter_value',
             t('o_parameter_value_correct'),
             true,
           ),
-          options(
-            inputParams,
-            'wrong_parameter_value',
-            t('o_parameter_value_other'),
-          ),
+          options(args, 'wrong_parameter_value', t('o_parameter_value_other')),
           options(
             params[paramIndex],
             'parameter_name',
@@ -119,10 +126,11 @@ export const parameterValue: QLCPrepararer = ({ functions, inputs }) =>
           ),
           fillRandomOptions(
             5,
-            () => finputs.map(d => simpleToProgram(d[paramIndex])),
+            () => argOpt.map(d => simpleToProgram(d[paramIndex])),
             'random_value',
             t('o_parameter_value_random'),
           ),
         ),
       };
     });
+};
