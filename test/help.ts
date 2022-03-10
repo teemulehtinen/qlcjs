@@ -1,4 +1,4 @@
-import { QLC } from '../src';
+import { QLC, SimpleValue } from '../src';
 
 export const getCorrect = (qlcs: QLC[]) =>
   qlcs.flatMap(q => q.options.filter(o => o.correct).map(o => o.answer)).sort();

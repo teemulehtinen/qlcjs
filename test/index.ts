@@ -2,7 +2,7 @@ import { suite } from 'uvu';
 import * as assert from 'uvu/assert';
 import * as mod from '../src';
 import { splitCorrectAndDistractors, overlaps, getCorrect } from './help';
-import { BLA_CODE, TINY_FUNCTIONS } from './test-code';
+import { BLA_CODE, FOR_CODE, TINY_FUNCTIONS } from './test-code';
 
 const API = suite('exports');
 
@@ -142,6 +142,31 @@ methodCall.run();
 
 const variableTrace = suite('VariableTrace');
 
+variableTrace('should record relevant variable histories', () => {
+  const qlcs = mod.generate(
+    FOR_CODE,
+    [{ count: 10, types: ['VariableTrace'] }],
+    {
+      functionName: 'power',
+      arguments: [[2, 2]],
+    },
+  );
+  assert.equal(getCorrect(qlcs), ['0, 1, 2', '1, 2, 4']);
+});
+
+variableTrace('should generate distractors', () => {
+  const qlc = mod.generate(FOR_CODE, [{ count: 1, types: ['VariableTrace'] }], {
+    functionName: 'power',
+    arguments: [[2, 2]],
+  })[0];
+  const { correct, distractors } = splitCorrectAndDistractors(qlc);
+  assert.equal(correct.length, 1);
+  assert.ok(distractors.length > 0);
+  const c = `${correct[0]}`;
+  assert.ok(['0, 1, 2', '1, 2, 4'].includes(c));
+  assert.ok(distractors.filter(s => `${s}`.includes(c)).length > 0);
+});
+
 variableTrace.run();
 
 // ---
@@ -149,27 +174,29 @@ variableTrace.run();
 const executor = suite('Executor');
 
 executor('should transform variable statements', () => {
-  const input: mod.ProgramInput = { functionName: 'bla', arguments: [[2]] };
-  const { tree, scope } = mod.createProgramModel(BLA_CODE, input);
+  const { tree, scope } = mod.createProgramModel(FOR_CODE, {
+    functionName: 'power',
+    arguments: [[4, 1]],
+  });
   const { script, variables } = mod.transformToRecorded(tree, scope);
-  assert.equal(variables.map(({ name }) => name).sort(), [
-    'blabla',
-    'i',
-    'repeated',
-  ]);
-  assert.ok(script.includes('__record(0, "i",'));
+  assert.equal(variables.map(({ name }) => name).sort(), ['i', 'n']);
+  assert.ok(script.includes('__record(0, "n",'));
 });
 
 executor('should evaluate and record variable history', () => {
-  const input: mod.ProgramInput = { functionName: 'bla', arguments: [[2]] };
-  const { tree, scope } = mod.createProgramModel(BLA_CODE, input);
+  const input: mod.ProgramInput = {
+    functionName: 'power',
+    arguments: [[2, 3]],
+  };
+  const { tree, scope } = mod.createProgramModel(FOR_CODE, input);
   const { script } = mod.transformToRecorded(tree, scope);
   const record = mod.evaluateRecorded(
     script,
     input.functionName,
     input.arguments[0],
   );
-  assert.equal(record['0_i'], [5, 4, 3, 2, 1, 0]);
+  assert.equal(record['0_n'], [1, 2, 4, 8]);
+  assert.equal(record['1_i'], [0, 1, 2, 3]);
 });
 
 executor.run();

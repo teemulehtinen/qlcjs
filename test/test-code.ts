@@ -28,3 +28,13 @@ export const BLA_CODE = `
 		i -= 1;
 	}
 `;
+
+export const FOR_CODE = `
+	function power(a, b) {
+		let n = 1;
+		for (let i = 0; i < b; i += 1) {
+			n *= a;
+		}
+		return n;
+	}
+`;

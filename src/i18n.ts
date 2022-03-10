@@ -70,6 +70,14 @@ const texts: { [locale: string]: { [key: string]: TextEntry } } = {
       'No, programs have typically arithmetic, comparison, and logical operators e.g. +, ===, or &&',
     o_name_parameter:
       'No, parameters are used to name inputs when functions are declared',
+
+    q_variable_trace: (...args) =>
+      `Which is the ordered sequence of values that are assigned to variable <em>${args[0]}</em> while executing <em>${args[1]}</em>?`,
+    o_trace_correct:
+      'Correct, step by step these values are assigned to the variable',
+    o_trace_miss: 'No, this sequence is missing a value that gets assigned',
+    o_trace_extra: 'No, this sequence has an extra value that is not assigned',
+    o_trace_random: 'No, this is an incorrect random sequence',
   },
 };
 
