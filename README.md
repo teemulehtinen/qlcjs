@@ -80,7 +80,7 @@ Which is the ordered sequence of values that are assigned to variable <em>i</em>
 
 ### Usage
 
-The library is implemented in TypeScript.
+The library is implemented in TypeScript and the types can describe a great deal of the API.
 
 ```TypeScript
 import { generate, QLCRequest, ProgramInput, QLC } from 'qlcjs';
@@ -92,13 +92,13 @@ const req: QLCRequest[] = [
   },
   {
     count: 3,
-    fill: true, // Fill the count together with questions for earlier requests
+    fill: true, // Fill in missing number of questions for the count
     uniqueTypes: true, // Only accept one question for each question type
   },
 ];
 
 const input: ProgramInput = {
-  functionName: 'task', // Try to evaluate this function for more questions
+  functionName: 'task', // Try to evaluate this function to collect dynamic data
   arguments: [[0, 'a'], [1, 'b'], [2, 'c']], // Use one set from these arguments
 };
 
@@ -106,6 +106,7 @@ const questions: QLC[] = generate(sourceCode, req, input);
 ```
 
 Example of using the build unpkg-module:
+`npm install && npm run build && ls dist/qlcjs.min.js`
 
 ```HTML
 <script src="qlcjs.min.js"></script>
