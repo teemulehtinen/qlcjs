@@ -29,8 +29,7 @@ export const BLA_CODE = `
 	}
 `;
 
-export const FOR_CODE = `
-	function power(a, b) {
+export const FOR_CODE = `function power(a, b) {
 		let n = 1;
 		for (let i = 0; i < b; i++) {
 			n *= a;

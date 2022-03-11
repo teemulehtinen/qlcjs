@@ -17,6 +17,22 @@ API('should generate different question types', () => {
   assert.ok(types.length > 1);
 });
 
+API('should generate nice texts', () => {
+  const text = mod.qlcsToText(
+    mod.generate(FOR_CODE, [{ count: 10, uniqueTypes: true }], {
+      functionName: 'power',
+      arguments: [
+        [2, 1],
+        [2, 2],
+      ],
+    }),
+    true,
+    true,
+  );
+  assert.ok(text.includes('Which'));
+  // console.log(text);
+});
+
 API.run();
 
 // ---
