@@ -72,6 +72,8 @@ const texts: { [locale: string]: { [key: string]: TextEntry } } = {
       'No, parameters are used to name inputs when functions are declared',
 
     q_variable_trace: (...args) =>
+      `Which is the ordered sequence of values that are assigned to variable <em>${args[0]}</em> while executing the program?`,
+    q_variable_trace_function: (...args) =>
       `Which is the ordered sequence of values that are assigned to variable <em>${args[0]}</em> while executing <em>${args[1]}</em>?`,
     o_trace_correct:
       'Correct, step by step these values are assigned to the variable',

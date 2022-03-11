@@ -37,3 +37,8 @@ export const FOR_CODE = `function power(a, b) {
 		return n;
 	}
 `;
+
+export const WHILE_CODE = `let n = 5;
+	while (n >= 0) {
+		n--;
+	}`;

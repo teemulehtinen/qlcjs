@@ -18,6 +18,7 @@ import {
   unpackCompoundExpression,
 } from './compound';
 import { simpleToProgram, SimpleValue } from '../helpers/simpleValues';
+import { isFunctionExpression } from '../analysis/getFunctions';
 
 const RECORD_FUNCTION = '__record';
 const RECORD_STORE = '__record_store';
@@ -77,7 +78,11 @@ export const transformToRecorded = (root: Node, global: Scope) => {
   const tree = transform(root, (node: Node): Node => {
     switch (node.type) {
       case 'VariableDeclarator':
-        if (node.binding.type === 'BindingIdentifier' && node.init) {
+        if (
+          node.binding.type === 'BindingIdentifier' &&
+          node.init &&
+          !isFunctionExpression(node.init)
+        ) {
           const v = checkWriteNode(node.binding, variables);
           if (v !== undefined) {
             return new VariableDeclarator({
@@ -88,7 +93,10 @@ export const transformToRecorded = (root: Node, global: Scope) => {
         }
         return node;
       case 'AssignmentExpression':
-        if (node.binding.type === 'AssignmentTargetIdentifier') {
+        if (
+          node.binding.type === 'AssignmentTargetIdentifier' &&
+          !isFunctionExpression(node.expression)
+        ) {
           const v = checkWriteNode(node.binding, variables);
           if (v !== undefined) {
             return new AssignmentExpression({
@@ -162,11 +170,11 @@ export const evaluateRecorded = (
     ${RECORD_STORE} = {};
     ${RECORD_FUNCTION} = (index, name, value, rec) => {
       const key = index + '_' + name;
-      ${RECORD_STORE}[key] = (${RECORD_STORE}[key] || []).concat(rec || value);
+      ${RECORD_STORE}[key] = (${RECORD_STORE}[key] || []).concat(rec !== undefined ? rec : value);
       return value;
     };
-    ${script}
-    ${functionName ? `;${functionName}(${argstr})` : ''}
+    ${script};
+    ${functionName ? `${functionName}(${argstr})` : ''}
     return ${RECORD_STORE};
   `)();
 };

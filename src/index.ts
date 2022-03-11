@@ -41,7 +41,7 @@ export const createProgramModel = (
           tree,
           scope,
           input?.functionName,
-          input ? pickOne(input.arguments) : undefined,
+          pickOne(input?.arguments || []),
         )
       : undefined,
   };

@@ -2,7 +2,7 @@ import { suite } from 'uvu';
 import * as assert from 'uvu/assert';
 import * as mod from '../src';
 import { splitCorrectAndDistractors, overlaps, getCorrect } from './help';
-import { BLA_CODE, FOR_CODE, TINY_FUNCTIONS } from './test-code';
+import { BLA_CODE, FOR_CODE, TINY_FUNCTIONS, WHILE_CODE } from './test-code';
 
 const API = suite('exports');
 
@@ -170,6 +170,13 @@ variableTrace('should record relevant variable histories', () => {
   assert.equal(getCorrect(qlcs), ['0, 1, 2', '1, 2, 4']);
 });
 
+variableTrace('should record without function request', () => {
+  const qlcs = mod.generate(WHILE_CODE, [
+    { count: 1, types: ['VariableTrace'] },
+  ]);
+  assert.equal(getCorrect(qlcs), ['5, 4, 3, 2, 1, 0, -1']);
+});
+
 variableTrace('should generate distractors', () => {
   const qlc = mod.generate(FOR_CODE, [{ count: 1, types: ['VariableTrace'] }], {
     functionName: 'power',
@@ -214,6 +221,20 @@ executor('should evaluate and record variable history', () => {
   );
   assert.equal(record['0_n'], [1, 2, 4, 8]);
   assert.equal(record['1_i'], [0, 1, 2, 3]);
+});
+
+executor('should evaluate without function request', () => {
+  const { tree, scope } = mod.createProgramModel(WHILE_CODE);
+  const { script } = mod.transformToRecorded(tree, scope);
+  const record = mod.evaluateRecorded(script);
+  assert.equal(record['0_n'], [5, 4, 3, 2, 1, 0, -1]);
+});
+
+executor('should not record function variables', () => {
+  const { tree, scope } = mod.createProgramModel(TINY_FUNCTIONS);
+  const { script, variables } = mod.transformToRecorded(tree, scope);
+  assert.equal(variables.map(({ name }) => name).sort(), ['a', 'newValue']);
+  assert.ok(script.includes('__record('));
 });
 
 executor.run();

@@ -3,6 +3,7 @@ import { lastBlockNode, loopNodes } from '../analysis/select';
 import {
   getVariables,
   parseReferences,
+  ReferenceWithLine,
   VariableDeclarations,
 } from '../analysis/getVariables';
 import { getLine } from '../analysis/getLine';
@@ -18,7 +19,11 @@ export const loopEnd: QLCPrepararer = ({ tree, locations }) =>
       question: t('q_loop_end', beg),
       options: pickOptions(
         options(end, 'last_line_inside_block', t('o_loop_end_correct'), true),
-        options(beg - 1, 'line_before_block', t('o_loop_end_before')),
+        options(
+          Math.max(1, beg - 1),
+          'line_before_block',
+          t('o_loop_end_before'),
+        ),
         options(end + 2, 'line_after_block', t('o_loop_end_after')),
         fillRandomOptions(
           6,
@@ -35,7 +40,7 @@ export const variableDeclaration: QLCPrepararer = ({ scope, locations }) =>
     .filter(({ reads, writes }) => reads.length > 0 || writes.length > 0)
     .map(({ name, declaration, reads, writes }) => () => {
       const isWrite = writes.length > 0;
-      const ref = pickOne(isWrite ? writes : reads);
+      const ref = pickOne(isWrite ? writes : reads) as ReferenceWithLine;
       const refLines = [...new Set(reads.concat(writes).map(r => r.line))];
       return {
         question: t(
@@ -62,7 +67,11 @@ export const variableDeclaration: QLCPrepararer = ({ scope, locations }) =>
           ),
           fillRandomOptions(
             5,
-            () => range(declaration.line - 2, Math.max(...refLines) + 2),
+            () =>
+              range(
+                Math.max(1, declaration.line - 2),
+                Math.max(...refLines) + 2,
+              ),
             'random_line',
             t('o_variable_declaration_random'),
           ),

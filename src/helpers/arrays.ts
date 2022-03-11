@@ -16,7 +16,8 @@ export const pick = <T>(input: T[], n?: number): T[] =>
 export const pickIndex = <T>(input: T[]): number =>
   Math.floor(Math.random() * input.length);
 
-export const pickOne = <T>(input: T[]): T => input[pickIndex(input)];
+export const pickOne = <T>(input: T[]): T | undefined =>
+  input.length > 0 ? input[pickIndex(input)] : undefined;
 
 export const notIn = <T>(input: T[], not: T[], key: (e: T) => string): T[] => {
   const notKeys = not.map(e => key(e));
