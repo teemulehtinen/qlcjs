@@ -1,7 +1,12 @@
 import { QLCPrepararer } from '../types';
 import { options, pickOptions } from './options';
-import { formatSimpleList, larger, smaller } from '../helpers/simpleValues';
-import { last, shuffle } from '../helpers/arrays';
+import {
+  formatSimpleList,
+  larger,
+  next,
+  smaller,
+} from '../helpers/simpleValues';
+import { shuffle } from '../helpers/arrays';
 import t from '../i18n';
 
 export const variableTrace: QLCPrepararer = ({ input, recorded }) => {
@@ -33,7 +38,7 @@ export const variableTrace: QLCPrepararer = ({ input, recorded }) => {
                 },
                 {
                   type: 'trace_extra_last',
-                  answer: formatSimpleList(vals.concat(smaller(last(vals)))),
+                  answer: formatSimpleList(vals.concat(next(vals))),
                   info: t('o_trace_extra'),
                 },
                 {

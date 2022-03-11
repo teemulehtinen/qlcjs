@@ -4,8 +4,6 @@ export const range = (b: number, e: number): number[] =>
 export const asArray = <T>(input: T | T[]): T[] =>
   Array.isArray(input) ? input : [input];
 
-export const last = <T>(input: T[]): T => input[input.length - 1];
-
 export const shuffle = <T>(input: T[]): T[] =>
   input
     .map((element): [T, number] => [element, Math.random()])

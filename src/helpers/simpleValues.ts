@@ -23,38 +23,37 @@ export const formatSimpleList = (v: SimpleValue[]) =>
   v.map(simpleToProgram).join(', ');
 
 export const smaller = (v: SimpleValue): SimpleValue => {
-  if (typeof v === 'number') {
-    return v - 1;
+  switch (typeof v) {
+    case 'number':
+      return v - 1;
+    case 'string':
+      if (v.trim() !== v) {
+        return v.trim();
+      }
+      return String.fromCharCode(...v.split('').map(c => c.charCodeAt(0) - 1));
+    case 'boolean':
+      return !v;
+    default:
+      return v.slice(0, -1);
   }
-  if (typeof v === 'string') {
-    const n = parseInt(v, 10);
-    if (!Number.isNaN(n)) {
-      return `${n - 1}`;
-    }
-    if (v.trim() !== v) {
-      return v.trim();
-    }
-    return String.fromCharCode(...v.split('').map(c => c.charCodeAt(0) - 1));
-  }
-  if (typeof v === 'boolean') {
-    return !v;
-  }
-  return v.slice(0, -1);
 };
 
 export const larger = (v: SimpleValue): SimpleValue => {
-  if (typeof v === 'number') {
-    return v + 1;
+  switch (typeof v) {
+    case 'number':
+      return v + 1;
+    case 'string':
+      return String.fromCharCode(...v.split('').map(c => c.charCodeAt(0) + 1));
+    case 'boolean':
+      return !v;
+    default:
+      return v.slice(1);
   }
-  if (typeof v === 'string') {
-    const n = parseInt(v, 10);
-    if (!Number.isNaN(n)) {
-      return `${n + 1}`;
-    }
-    return String.fromCharCode(...v.split('').map(c => c.charCodeAt(0) + 1));
+};
+
+export const next = (vs: SimpleValue[]): SimpleValue => {
+  if (vs.length < 2 || vs[vs.length - 1] < vs[vs.length - 2]) {
+    return smaller(vs[vs.length - 1]);
   }
-  if (typeof v === 'boolean') {
-    return !v;
-  }
-  return v.slice(1);
+  return larger(vs[vs.length - 1]);
 };
