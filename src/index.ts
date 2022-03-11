@@ -36,15 +36,14 @@ export const createProgramModel = (
     functions: getFunctions
       ? getFunctionsWithVariables(scope, tree)
       : undefined,
-    recorded:
-      recordEvaluation && input
-        ? recordVariableHistory(
-            tree,
-            scope,
-            input.functionName,
-            pickOne(input.arguments),
-          )
-        : undefined,
+    recorded: recordEvaluation
+      ? recordVariableHistory(
+          tree,
+          scope,
+          input?.functionName,
+          input ? pickOne(input.arguments) : undefined,
+        )
+      : undefined,
   };
 };
 

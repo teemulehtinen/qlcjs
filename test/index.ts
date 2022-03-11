@@ -190,13 +190,14 @@ variableTrace.run();
 const executor = suite('Executor');
 
 executor('should transform variable statements', () => {
-  const { tree, scope } = mod.createProgramModel(FOR_CODE, {
-    functionName: 'power',
-    arguments: [[4, 1]],
-  });
+  const { tree, scope } = mod.createProgramModel(BLA_CODE);
   const { script, variables } = mod.transformToRecorded(tree, scope);
-  assert.equal(variables.map(({ name }) => name).sort(), ['i', 'n']);
-  assert.ok(script.includes('__record(0, "n",'));
+  assert.equal(variables.map(({ name }) => name).sort(), [
+    'blabla',
+    'i',
+    'repeated',
+  ]);
+  assert.ok(script.includes('__record(0, "i",'));
 });
 
 executor('should evaluate and record variable history', () => {

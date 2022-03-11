@@ -153,10 +153,10 @@ export const transformToRecorded = (root: Node, global: Scope) => {
 
 export const evaluateRecorded = (
   script: string,
-  functionName: string,
-  functionArguments: SimpleValue[],
+  functionName?: string,
+  functionArguments?: SimpleValue[],
 ): { [k: string]: SimpleValue[] } => {
-  const argstr = functionArguments.map(simpleToProgram).join(', ');
+  const argstr = functionArguments?.map(simpleToProgram).join(', ');
   // eslint-disable-next-line no-new-func
   return new Function(`
     ${RECORD_STORE} = {};
@@ -166,7 +166,7 @@ export const evaluateRecorded = (
       return value;
     };
     ${script}
-    ;${functionName}(${argstr});
+    ${functionName ? `;${functionName}(${argstr})` : ''}
     return ${RECORD_STORE};
   `)();
 };
@@ -174,8 +174,8 @@ export const evaluateRecorded = (
 export const recordVariableHistory = (
   root: Node,
   global: Scope,
-  functionName: string,
-  functionArguments: SimpleValue[],
+  functionName?: string,
+  functionArguments?: SimpleValue[],
 ) => {
   const { script, variables } = transformToRecorded(root, global);
   const history = evaluateRecorded(script, functionName, functionArguments);

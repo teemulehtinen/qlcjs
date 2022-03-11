@@ -40,9 +40,9 @@ export interface ProgramModel {
   input?: ProgramInput;
   functions?: FunctionWithVariables[];
   recorded?: {
-    arguments: SimpleValue[];
     variables: RecordableVariable[];
     history: { [k: string]: SimpleValue[] };
+    arguments?: SimpleValue[];
   };
 }
 
