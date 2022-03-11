@@ -28,7 +28,7 @@ export interface QLCTemplate extends QLCTyped {
 export type QLCPrepararer = (model: ProgramModel) => QLCGenerator[];
 
 export interface QLCPrepared extends QLCTyped {
-  key: number;
+  pos: number;
   generate: QLCGenerator;
 }
 
@@ -71,7 +71,9 @@ export interface QLCOption {
   info?: string;
 }
 
-export interface QLC extends QLCTyped, QLCBase {}
+export interface QLC extends QLCTyped, QLCBase {
+  pos: number;
+}
 
 export type QLCType =
   | 'FunctionName'

@@ -9,13 +9,14 @@ import {
   QLCTyped,
   ProgramInput,
 } from './types';
-import { pickIndex, pickOne } from './helpers/arrays';
+import { pickOne } from './helpers/arrays';
 import { getFunctionsWithVariables } from './analysis/getFunctions';
 import questions from './questions';
 import { recordVariableHistory } from './executor';
 
 export { QLC, QLCType, QLCPrepared, ProgramInput, ProgramModel } from './types';
 export { SimpleValue } from './helpers/simpleValues';
+export { qlcToText, qlcsToText } from './format';
 export { transformToRecorded, evaluateRecorded } from './executor';
 
 export const createProgramModel = (
@@ -77,7 +78,7 @@ export const prepare = (
         generate,
       })),
     )
-    .map(({ type, generate }, key) => ({ key, generate, type }));
+    .map(({ type, generate }, pos) => ({ type, pos, generate }));
 };
 
 const allUsedTypes = (requests: QLCRequest[]): QLCType[] | undefined => {
@@ -101,23 +102,22 @@ export const generate = (
 ): QLC[] => {
   const r = requests || [{ count: 1 }];
   let prepared = prepare(source, allUsedTypes(r), input);
-  const out: [number, QLC][] = [];
+  const out: QLC[] = [];
   r.forEach(({ count, fill, types, uniqueTypes }) => {
     let targetCount = fill ? count - out.length : count;
     while (targetCount > 0 && prepared.length > 0) {
       const sample = selectByType(prepared, types);
-      const i = pickIndex(sample);
-      const picked = sample[i];
+      const picked = pickOne(sample);
       if (picked) {
-        out.push([i, { type: picked.type, ...picked.generate() }]);
+        out.push({ type: picked.type, pos: picked.pos, ...picked.generate() });
         if (uniqueTypes) {
           prepared = prepared.filter(({ type }) => type !== picked.type);
         } else {
-          prepared = prepared.filter(({ key }) => key !== picked.key);
+          prepared = prepared.filter(({ pos }) => pos !== picked.pos);
         }
       }
       targetCount -= 1;
     }
   });
-  return out.sort((a, b) => a[0] - b[0]).map(o => o[1]);
+  return out.sort((a, b) => a.pos - b.pos);
 };
