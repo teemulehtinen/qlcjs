@@ -1,6 +1,6 @@
 {
   "version": "0.0.0",
-  "name": "qlcjs",
+  "name": "@teemulehtinen/qlcjs",
   "repository": "https://github.com/teemulehtinen/qlcjs.git",
   "unpkg": "dist/qlcjs.min.js",
   "module": "dist/index.mjs",
