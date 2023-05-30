@@ -85,7 +85,7 @@ The library is implemented in TypeScript and the types can describe a great deal
     npm install git+https://github.com/teemulehtinen/qlcjs
 
 ```TypeScript
-import { generate, QLCRequest, ProgramInput, QLC } from 'qlcjs';
+import { generate, QLCRequest, ProgramInput, QLC } from '@teemulehtinen/qlcjs';
 
 const req: QLCRequest[] = [
   {
