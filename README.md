@@ -82,6 +82,8 @@ Which is the ordered sequence of values that are assigned to variable <em>i</em>
 
 The library is implemented in TypeScript and the types can describe a great deal of the API.
 
+    npm install git+https://github.com/teemulehtinen/qlcjs
+
 ```TypeScript
 import { generate, QLCRequest, ProgramInput, QLC } from 'qlcjs';
 
